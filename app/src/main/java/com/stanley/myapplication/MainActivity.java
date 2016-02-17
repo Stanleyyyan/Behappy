@@ -9,6 +9,7 @@ import android.widget.Button;
 public class MainActivity extends AppCompatActivity {
 
     private Button btn_to_map;
+    private Button btn_app_usage;
 
 
     @Override
@@ -21,6 +22,15 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(MainActivity.this, LocationActivity.class);
+                startActivity(intent);
+            }
+        });
+
+        btn_app_usage = (Button) findViewById(R.id.btn_app_usage);
+        btn_app_usage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MainActivity.this, AppUsageActivity.class);
                 startActivity(intent);
             }
         });
