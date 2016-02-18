@@ -1,0 +1,269 @@
+{
+  "survey_properties": {
+    "intro_message": "Here are 20 questions in total.<br><br> Please answer with your true feeling at the moment. <br><br>Take a break anytime if you need :)",
+    "end_message": "",
+    "skip_intro": false
+  },
+  "questions": [
+    {
+      "question_type": "Radioboxes",
+      "question_title": "1. I am unhappy doing so many things alone",
+      "description": "",
+      "required": true,
+      "random_choices": false,
+      "choices": [
+        "O - I often feel this way",
+        "S - I sometimes feel this way",
+        "R - I rarely feel this way",
+        "N - I never feel this way"
+      ]
+    },
+    {
+      "question_type": "Radioboxes",
+      "question_title": "2. I have nobody to talk to",
+      "description": "",
+      "required": true,
+      "random_choices": false,
+      "choices": [
+        "O - I often feel this way",
+        "S - I sometimes feel this way",
+        "R - I rarely feel this way",
+        "N - I never feel this way"
+      ]
+    },
+    {
+      "question_type": "Radioboxes",
+      "question_title": "3. I cannot tolerate being so alone",
+      "description": "",
+      "required": true,
+      "random_choices": false,
+      "choices": [
+        "O - I often feel this way",
+        "S - I sometimes feel this way",
+        "R - I rarely feel this way",
+        "N - I never feel this way"
+      ]
+    },
+    {
+      "question_type": "Radioboxes",
+      "question_title": "4. I lack companionship",
+      "description": "",
+      "required": true,
+      "random_choices": false,
+      "choices": [
+        "O - I often feel this way",
+        "S - I sometimes feel this way",
+        "R - I rarely feel this way",
+        "N - I never feel this way"
+      ]
+    },
+    {
+      "question_type": "Radioboxes",
+      "question_title": "5. I feel as if nobody really understands me",
+      "description": "",
+      "required": true,
+      "random_choices": false,
+      "choices": [
+        "O - I often feel this way",
+        "S - I sometimes feel this way",
+        "R - I rarely feel this way",
+        "N - I never feel this way"
+      ]
+    },
+    {
+      "question_type": "Radioboxes",
+      "question_title": "6. I find myself waiting for people to call or write",
+      "description": "",
+      "required": true,
+      "random_choices": false,
+      "choices": [
+        "O - I often feel this way",
+        "S - I sometimes feel this way",
+        "R - I rarely feel this way",
+        "N - I never feel this way"
+      ]
+    },
+    {
+      "question_type": "Radioboxes",
+      "question_title": "7. There is no one I can turn to",
+      "description": "",
+      "required": true,
+      "random_choices": false,
+      "choices": [
+        "O - I often feel this way",
+        "S - I sometimes feel this way",
+        "R - I rarely feel this way",
+        "N - I never feel this way"
+      ]
+    },
+    {
+      "question_type": "Radioboxes",
+      "question_title": "8. I am no longer close to anyone",
+      "description": "",
+      "required": true,
+      "random_choices": false,
+      "choices": [
+        "O - I often feel this way",
+        "S - I sometimes feel this way",
+        "R - I rarely feel this way",
+        "N - I never feel this way"
+      ]
+    },
+    {
+      "question_type": "Radioboxes",
+      "question_title": "9. My interests and ideas are not shared by those around me",
+      "description": "",
+      "required": true,
+      "random_choices": false,
+      "choices": [
+        "O - I often feel this way",
+        "S - I sometimes feel this way",
+        "R - I rarely feel this way",
+        "N - I never feel this way"
+      ]
+    },
+    {
+      "question_type": "Radioboxes",
+      "question_title": "10. I feel left out",
+      "description": "",
+      "required": true,
+      "random_choices": false,
+      "choices": [
+        "O - I often feel this way",
+        "S - I sometimes feel this way",
+        "R - I rarely feel this way",
+        "N - I never feel this way"
+      ]
+    },
+    {
+      "question_type": "Radioboxes",
+      "question_title": "11. I feel completely alone",
+      "description": "",
+      "required": true,
+      "random_choices": false,
+      "choices": [
+        "O - I often feel this way",
+        "S - I sometimes feel this way",
+        "R - I rarely feel this way",
+        "N - I never feel this way"
+      ]
+    },
+    {
+      "question_type": "Radioboxes",
+      "question_title": "12. I am unable to reach out and communicate with those around me",
+      "description": "",
+      "required": true,
+      "random_choices": false,
+      "choices": [
+        "O - I often feel this way",
+        "S - I sometimes feel this way",
+        "R - I rarely feel this way",
+        "N - I never feel this way"
+      ]
+    },
+    {
+      "question_type": "Radioboxes",
+      "question_title": "13. My social relationships are superficial",
+      "description": "",
+      "required": true,
+      "random_choices": false,
+      "choices": [
+        "O - I often feel this way",
+        "S - I sometimes feel this way",
+        "R - I rarely feel this way",
+        "N - I never feel this way"
+      ]
+    },
+    {
+      "question_type": "Radioboxes",
+      "question_title": "14. I feel starved for company",
+      "description": "",
+      "required": true,
+      "random_choices": false,
+      "choices": [
+        "O - I often feel this way",
+        "S - I sometimes feel this way",
+        "R - I rarely feel this way",
+        "N - I never feel this way"
+      ]
+    },
+    {
+      "question_type": "Radioboxes",
+      "question_title": "15. No one really knows me well",
+      "description": "",
+      "required": true,
+      "random_choices": false,
+      "choices": [
+        "O - I often feel this way",
+        "S - I sometimes feel this way",
+        "R - I rarely feel this way",
+        "N - I never feel this way"
+      ]
+    },
+    {
+      "question_type": "Radioboxes",
+      "question_title": "16. I feel isolated from others",
+      "description": "",
+      "required": true,
+      "random_choices": false,
+      "choices": [
+        "O - I often feel this way",
+        "S - I sometimes feel this way",
+        "R - I rarely feel this way",
+        "N - I never feel this way"
+      ]
+    },
+    {
+      "question_type": "Radioboxes",
+      "question_title": "17. I am unhappy being so withdrawn",
+      "description": "",
+      "required": true,
+      "random_choices": false,
+      "choices": [
+        "O - I often feel this way",
+        "S - I sometimes feel this way",
+        "R - I rarely feel this way",
+        "N - I never feel this way"
+      ]
+    },
+    {
+      "question_type": "Radioboxes",
+      "question_title": "18. It is difficult for me to make friends",
+      "description": "",
+      "required": true,
+      "random_choices": false,
+      "choices": [
+        "O - I often feel this way",
+        "S - I sometimes feel this way",
+        "R - I rarely feel this way",
+        "N - I never feel this way"
+      ]
+    },
+    {
+      "question_type": "Radioboxes",
+      "question_title": "19. I feel shut out and excluded by others",
+      "description": "",
+      "required": true,
+      "random_choices": false,
+      "choices": [
+        "O - I often feel this way",
+        "S - I sometimes feel this way",
+        "R - I rarely feel this way",
+        "N - I never feel this way"
+      ]
+    },
+    {
+      "question_type": "Radioboxes",
+      "question_title": "20. People are around me but not with me",
+      "description": "",
+      "required": true,
+      "random_choices": false,
+      "choices": [
+        "O - I often feel this way",
+        "S - I sometimes feel this way",
+        "R - I rarely feel this way",
+        "N - I never feel this way"
+      ]
+    }
+  ]
+}

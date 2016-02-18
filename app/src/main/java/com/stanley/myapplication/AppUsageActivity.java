@@ -35,48 +35,48 @@ import java.util.List;
 
 public class AppUsageActivity extends AppCompatActivity {
 
-    private static final String TAG = "AppUsage";
-    UsageStatsManager mUsageStatsManager;
-    private TextView statistics;
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_app_usage);
-        mUsageStatsManager = (UsageStatsManager) this.getSystemService(Context.USAGE_STATS_SERVICE);
-        statistics = (TextView) findViewById(R.id.tv_app_usage);
-        List<UsageStats> usageStatsList = getUsageStatistics(4);
-        updateAppsList(usageStatsList);
-    }
-
-    public List<UsageStats> getUsageStatistics(int intervalType) {
-        // Get the app statistics since one year ago from the current time.
-        Calendar cal = Calendar.getInstance();
-        cal.add(Calendar.YEAR, -1);
-
-        long start = System.currentTimeMillis() - (long)600000;
-        long end = System.currentTimeMillis();
-
-        List<UsageStats> queryUsageStats = mUsageStatsManager
-                .queryUsageStats(UsageStatsManager.INTERVAL_BEST, start, end);
-
-        if (queryUsageStats.size() == 0) {
-            Log.i(TAG, "The user may not allow the access to apps usage. ");
-            Toast.makeText(this, "fail",
-                    Toast.LENGTH_LONG).show();
-        }
-        return queryUsageStats;
-    }
-
-    void updateAppsList(List<UsageStats> usageStatsList) {
-        if (usageStatsList == null) {
-            return;
-        }
-        String s = "";
-        SimpleDateFormat sdf = new SimpleDateFormat("MMM dd,yyyy HH:mm");
-        for (int i = 0; i < usageStatsList.size(); i++) {
-            Date date = new Date(usageStatsList.get(i).getLastTimeUsed());
-            s += usageStatsList.get(i).getPackageName() + String.valueOf(sdf.format(date)) + "\t";
-        }
-        statistics.setText(s);
-    }
+//    private static final String TAG = "AppUsage";
+//    UsageStatsManager mUsageStatsManager;
+//    private TextView statistics;
+//    @Override
+//    protected void onCreate(Bundle savedInstanceState) {
+//        super.onCreate(savedInstanceState);
+//        setContentView(R.layout.activity_app_usage);
+//        mUsageStatsManager = (UsageStatsManager) this.getSystemService(Context.USAGE_STATS_SERVICE);
+//        statistics = (TextView) findViewById(R.id.tv_app_usage);
+//        List<UsageStats> usageStatsList = getUsageStatistics(4);
+//        updateAppsList(usageStatsList);
+//    }
+//
+//    public List<UsageStats> getUsageStatistics(int intervalType) {
+//        // Get the app statistics since one year ago from the current time.
+//        Calendar cal = Calendar.getInstance();
+//        cal.add(Calendar.YEAR, -1);
+//
+//        long start = System.currentTimeMillis() - (long)600000;
+//        long end = System.currentTimeMillis();
+//
+//        List<UsageStats> queryUsageStats = mUsageStatsManager
+//                .queryUsageStats(UsageStatsManager.INTERVAL_BEST, start, end);
+//
+//        if (queryUsageStats.size() == 0) {
+//            Log.i(TAG, "The user may not allow the access to apps usage. ");
+//            Toast.makeText(this, "fail",
+//                    Toast.LENGTH_LONG).show();
+//        }
+//        return queryUsageStats;
+//    }
+//
+//    void updateAppsList(List<UsageStats> usageStatsList) {
+//        if (usageStatsList == null) {
+//            return;
+//        }
+//        String s = "";
+//        SimpleDateFormat sdf = new SimpleDateFormat("MMM dd,yyyy HH:mm");
+//        for (int i = 0; i < usageStatsList.size(); i++) {
+//            Date date = new Date(usageStatsList.get(i).getLastTimeUsed());
+//            s += usageStatsList.get(i).getPackageName() + String.valueOf(sdf.format(date)) + "\t";
+//        }
+//        statistics.setText(s);
+//    }
 }
