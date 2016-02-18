@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/nav_add_loc"
+            android:title="Add Locations" />
+        <item
+            android:id="@+id/nav_survey"
+            android:title="Take the Survey" />
+        <item
+            android:id="@+id/nav_contact"
+            android:title="Categorize Contacts" />
+    </group>
+
+    <item android:title="Status">
+        <menu>
+            <item
+                android:id="@+id/nav_app_use"
+                android:title="See App Usage" />
+            <item
+                android:id="@+id/nav_map"
+                android:title="Map" />
+
+        </menu>
+    </item>
+
+</menu>

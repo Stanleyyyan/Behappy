@@ -13,28 +13,35 @@
         android:text="GO TO THE MAP"
         android:id="@+id/btn_to_map"
         android:layout_alignParentTop="true"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true"
-        android:layout_marginRight="110dp"
-        android:layout_marginEnd="110dp" />
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
 
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="See App Usage"
         android:id="@+id/btn_app_usage"
-        android:layout_marginTop="46dp"
-        android:layout_below="@+id/btn_to_map"
-        android:layout_alignLeft="@+id/btn_to_map"
-        android:layout_alignStart="@+id/btn_to_map" />
+        android:layout_alignTop="@+id/btn_see_contact"
+        android:layout_toRightOf="@+id/btn_take_survey"
+        android:layout_toEndOf="@+id/btn_take_survey" />
 
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Add Locaitons"
         android:id="@+id/btn_to_add_loc"
+        android:layout_alignTop="@+id/btn_to_map"
+        android:layout_toRightOf="@+id/btn_take_survey"
+        android:layout_toEndOf="@+id/btn_take_survey" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="See Contact"
+        android:id="@+id/btn_see_contact"
         android:layout_centerVertical="true"
-        android:layout_centerHorizontal="true" />
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
 
     <Button
         android:layout_width="wrap_content"
@@ -42,8 +49,8 @@
         android:text="Take the survey"
         android:id="@+id/btn_take_survey"
         android:layout_alignParentBottom="true"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true" />
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
 
 
 </RelativeLayout>

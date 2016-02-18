@@ -23,6 +23,7 @@ import android.view.View;
 import android.widget.Button;
 
 import com.androidadvance.androidsurvey.SurveyActivity;
+import com.stanley.myapplication.contactlist.ContactActivity;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -34,6 +35,7 @@ public class MainActivity extends AppCompatActivity {
     private Button btn_app_usage;
     private Button btn_add_loc;
     private Button btn_take_survey;
+    private Button btn_see_contact;
 
 
     @Override
@@ -76,6 +78,16 @@ public class MainActivity extends AppCompatActivity {
                 i_survey.putExtra("json_survey", loadSurveyJson("example_survey_1.json"));
                 startActivityForResult(i_survey, SURVEY_REQUEST);
 
+            }
+        });
+
+
+        btn_see_contact =  (Button) findViewById(R.id.btn_see_contact);
+        btn_see_contact.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(MainActivity.this, ContactActivity.class);
+                startActivity(intent);
             }
         });
 
