@@ -18,6 +18,19 @@
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="com.google.android.providers.gsf.permission.READ_GSERVICES" />
 
+    
+    <!-- 读联系人权限 -->
+    <uses-permission android:name="android.permission.READ_CONTACTS" />
+    <!-- 写联系人权限 -->
+    <uses-permission android:name="android.permission.WRITE_CONTACTS" />
+    <!-- 拨号权限 -->
+    <uses-permission android:name="android.permission.CALL_PHONE" />
+    <!-- 读短信权限 -->
+    <uses-permission android:name="android.permission.READ_SMS" />
+    <!-- 获取通话记录所需的权限 -->
+    <uses-permission android:name="android.permission.READ_CALL_LOG" />
+>>>>>>> c5a19f8161c6294f685a82ae1bc905371cf32e4a
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -50,14 +63,16 @@
         <activity
             android:name=".MainActivity"
             android:label="@string/app_name" />
+
         <activity android:name=".LocationActivity" />
         <activity android:name=".AppUsageActivity" />
-        <activity android:name=".SaveLocActivity" >
-        </activity>
+        <activity android:name=".SaveLocActivity" />
+        <activity android:name=".contactlist.ContactActivity"></activity>
 
         <activity android:name="com.androidadvance.androidsurvey.SurveyActivity"
             android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize"
             android:windowSoftInputMode="stateHidden"/>
+
     </application>
 
 </manifest>
