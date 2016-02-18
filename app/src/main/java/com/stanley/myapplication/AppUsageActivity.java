@@ -1,6 +1,7 @@
 package com.stanley.myapplication;
 
 import android.annotation.TargetApi;
+import android.app.usage.UsageEvents;
 import android.app.usage.UsageStats;
 import android.app.usage.UsageStatsManager;
 import android.content.Context;
@@ -44,11 +45,11 @@ public class AppUsageActivity extends AppCompatActivity {
         setContentView(R.layout.activity_app_usage);
         mUsageStatsManager = (UsageStatsManager) this.getSystemService(Context.USAGE_STATS_SERVICE);
         statistics = (TextView) findViewById(R.id.tv_app_usage);
-        List<UsageStats> usageStatsList = getUsageStatistics(4);
-        updateAppsList(usageStatsList);
+        UsageEvents events = getUsageStatistics();
+        updateAppsList(events);
     }
 
-    public List<UsageStats> getUsageStatistics(int intervalType) {
+    public UsageEvents getUsageStatistics() {
         // Get the app statistics since one year ago from the current time.
         Calendar cal = Calendar.getInstance();
         cal.add(Calendar.YEAR, -1);
@@ -56,26 +57,25 @@ public class AppUsageActivity extends AppCompatActivity {
         long start = System.currentTimeMillis() - (long)600000;
         long end = System.currentTimeMillis();
 
-        List<UsageStats> queryUsageStats = mUsageStatsManager
-                .queryUsageStats(UsageStatsManager.INTERVAL_BEST, start, end);
+        UsageEvents events = mUsageStatsManager.queryEvents(start, end);
 
-        if (queryUsageStats.size() == 0) {
+        if (!events.hasNextEvent()) {
             Log.i(TAG, "The user may not allow the access to apps usage. ");
             Toast.makeText(this, "fail",
                     Toast.LENGTH_LONG).show();
         }
-        return queryUsageStats;
+        return events;
     }
 
-    void updateAppsList(List<UsageStats> usageStatsList) {
-        if (usageStatsList == null) {
+    void updateAppsList(UsageEvents events) {
+        if (!events.hasNextEvent()) {
             return;
         }
         String s = "";
-        SimpleDateFormat sdf = new SimpleDateFormat("MMM dd,yyyy HH:mm");
-        for (int i = 0; i < usageStatsList.size(); i++) {
-            Date date = new Date(usageStatsList.get(i).getLastTimeUsed());
-            s += usageStatsList.get(i).getPackageName() + String.valueOf(sdf.format(date)) + "\t";
+        UsageEvents.Event eventOut = new UsageEvents.Event();
+        while (events.hasNextEvent()) {
+            events.getNextEvent(eventOut);
+            s += eventOut.getPackageName() + String.valueOf(eventOut.getTimeStamp());
         }
         statistics.setText(s);
     }
