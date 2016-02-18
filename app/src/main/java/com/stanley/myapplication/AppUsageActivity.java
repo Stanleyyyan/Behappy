@@ -54,7 +54,7 @@ public class AppUsageActivity extends AppCompatActivity {
         Calendar cal = Calendar.getInstance();
         cal.add(Calendar.YEAR, -1);
 
-        long start = System.currentTimeMillis() - (long)600000;
+        long start = System.currentTimeMillis() - (long)1200000;
         long end = System.currentTimeMillis();
 
         UsageEvents events = mUsageStatsManager.queryEvents(start, end);
@@ -73,9 +73,15 @@ public class AppUsageActivity extends AppCompatActivity {
         }
         String s = "";
         UsageEvents.Event eventOut = new UsageEvents.Event();
+        SimpleDateFormat sdf = new SimpleDateFormat("MMM dd,yyyy HH:mm");
         while (events.hasNextEvent()) {
             events.getNextEvent(eventOut);
-            s += eventOut.getPackageName() + String.valueOf(eventOut.getTimeStamp());
+            Date date = new Date(eventOut.getTimeStamp());
+            s += eventOut.getPackageName() + ": " + String.valueOf(sdf.format(date)) + "\t";
+            if (eventOut.getEventType() == 7) {
+                //Date date = new Date(eventOut.getTimeStamp());
+                //s += eventOut.getPackageName() + String.valueOf(sdf.format(date)) + "\t";
+            }
         }
         statistics.setText(s);
     }
