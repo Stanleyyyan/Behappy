@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.util.Log;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -101,6 +102,9 @@ public class Main2Activity extends AppCompatActivity
             Intent intent = new Intent(Main2Activity.this, LocationActivity.class);
             startActivity(intent);
 
+        } else if (id == R.id.nav_show_contacts) {
+            Intent intent = new Intent(Main2Activity.this, ContactActivity.class);
+            startActivity(intent);
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -119,6 +123,30 @@ public class Main2Activity extends AppCompatActivity
         } catch (IOException ex) {
             ex.printStackTrace();
             return null;
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == SURVEY_REQUEST) {
+            if (resultCode == RESULT_OK) {
+
+                String answers_json = data.getExtras().getString("answers");
+                Log.d("****", "****************** WE HAVE ANSWERS ******************");
+                Log.v("ANSWERS JSON", answers_json);
+                Log.d("****", "*****************************************************");
+
+                String[] str_result = answers_json.split(",");
+                Log.d("answers", str_result[0]);
+
+                for (int i = 0; i < str_result.length; i++) {
+                    String[] substr = str_result[i].split(":");
+                    char answer = substr[1].charAt(1);
+                    Log.d("final answer", ""+answer);
+                }
+
+                //do whatever you want with them...
+            }
         }
     }
 }

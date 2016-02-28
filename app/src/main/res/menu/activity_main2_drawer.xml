@@ -4,13 +4,17 @@
     <group android:checkableBehavior="single">
         <item
             android:id="@+id/nav_add_loc"
-            android:title="Add Locations" />
+            android:title="Add Special Locations" />
         <item
             android:id="@+id/nav_survey"
             android:title="Take the Survey" />
         <item
             android:id="@+id/nav_contact"
             android:title="Categorize Contacts" />
+
+        <item
+            android:id="@+id/nav_show_contacts"
+            android:title="Show Recent Contacts"/>
     </group>
 
     <item android:title="Status">
