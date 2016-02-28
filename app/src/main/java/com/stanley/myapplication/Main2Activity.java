@@ -155,8 +155,6 @@ public class Main2Activity extends AppCompatActivity
                     char answer = substr[1].charAt(1);
                     Log.d("final answer", ""+answer);
                 }
-
-                //do whatever you want with them...
             }
         }
     }
