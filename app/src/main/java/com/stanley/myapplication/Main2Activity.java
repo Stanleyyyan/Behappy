@@ -14,6 +14,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Button;
 
 import com.androidadvance.androidsurvey.SurveyActivity;
 import com.stanley.myapplication.contactlist.ContactActivity;
@@ -25,6 +26,7 @@ public class Main2Activity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
     private static final int SURVEY_REQUEST = 1337;
+    private Button btn_lonely;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,6 +43,15 @@ public class Main2Activity extends AppCompatActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+
+        btn_lonely = (Button) findViewById(R.id.btn_lonely);
+        btn_lonely.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(Main2Activity.this, AppUsageActivity.class);
+                startActivity(intent);
+            }
+        });
     }
 
     @Override
