@@ -14,7 +14,7 @@
         location permissions for the 'MyLocation' functionality.
     -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="com.google.android.providers.gsf.permission.READ_GSERVICES" />
 
@@ -58,9 +58,9 @@
         <!-- <meta-data android:name="com.google.android.gms.version" -->
         <!-- android:value="@integer/google_play_services_version" /> -->
 
-        <activity android:name=".LocationActivity" />
+        <activity android:name=".Locations.LocationActivity" />
         <activity android:name=".AppUsageActivity" />
-        <activity android:name=".SaveLocActivity" />
+        <activity android:name=".Locations.SaveLocActivity" />
         <activity android:name=".contactlist.ContactActivity" />
         <activity
             android:name="com.androidadvance.androidsurvey.SurveyActivity"

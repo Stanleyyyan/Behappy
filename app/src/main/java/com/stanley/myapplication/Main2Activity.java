@@ -1,9 +1,11 @@
 package com.stanley.myapplication;
 
+import android.content.Context;
 import android.content.Intent;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.util.Log;
 import android.view.View;
 import android.support.design.widget.NavigationView;
@@ -17,16 +19,27 @@ import android.view.MenuItem;
 import android.widget.Button;
 
 import com.androidadvance.androidsurvey.SurveyActivity;
+import com.stanley.myapplication.Locations.LocationActivity;
+import com.stanley.myapplication.Locations.MySQLiteLocHelper;
+import com.stanley.myapplication.Locations.SaveLocActivity;
 import com.stanley.myapplication.contactlist.ContactActivity;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Date;
 
 public class Main2Activity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
+    private static final String TAG = "Main2Activity";
 
     private static final int SURVEY_REQUEST = 1337;
     private Button btn_lonely;
+
+    private int userId = 1;
+
+    private LocationManager mlocManager;
+    private Location currentLoc;
+    MySQLiteLocHelper mySQLiteLocHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,10 +57,31 @@ public class Main2Activity extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
+        try {
+            mlocManager = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
+            LocationListener mlocListener = new MyLocationListener();
+            mlocManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000, 1, mlocListener);
+
+        } catch (SecurityException e) {
+
+        }
+
         btn_lonely = (Button) findViewById(R.id.btn_lonely);
         btn_lonely.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                double lon = 0.0;
+                double la = 0.0;
+
+                if (currentLoc != null) {
+                    la = currentLoc.getLatitude();
+                    lon = currentLoc.getLongitude();
+                    Log.d(TAG, "la" + la + "lon" + lon);
+
+                    mySQLiteLocHelper = new MySQLiteLocHelper(Main2Activity.this);
+                    mySQLiteLocHelper.specialLocAddLonely(userId, la, lon, new Date().getTime(), 0);
+                }
+
                 Intent intent = new Intent(Main2Activity.this, AppUsageActivity.class);
                 startActivity(intent);
             }
@@ -116,6 +150,9 @@ public class Main2Activity extends AppCompatActivity
         } else if (id == R.id.nav_show_contacts) {
             Intent intent = new Intent(Main2Activity.this, ContactActivity.class);
             startActivity(intent);
+        } else if (id == R.id.nav_delete) {
+            mySQLiteLocHelper = new MySQLiteLocHelper(Main2Activity.this);
+            mySQLiteLocHelper.deleteAll(Main2Activity.this);
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -139,10 +176,12 @@ public class Main2Activity extends AppCompatActivity
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        Date date = new Date();
         if (requestCode == SURVEY_REQUEST) {
             if (resultCode == RESULT_OK) {
 
                 String answers_json = data.getExtras().getString("answers");
+
                 Log.d("****", "****************** WE HAVE ANSWERS ******************");
                 Log.v("ANSWERS JSON", answers_json);
                 Log.d("****", "*****************************************************");
@@ -150,12 +189,46 @@ public class Main2Activity extends AppCompatActivity
                 String[] str_result = answers_json.split(",");
                 Log.d("answers", str_result[0]);
 
+                String answerStr = "";
+
                 for (int i = 0; i < str_result.length; i++) {
                     String[] substr = str_result[i].split(":");
                     char answer = substr[1].charAt(1);
+                    answerStr = answerStr + answer;
                     Log.d("final answer", ""+answer);
                 }
+
+                mySQLiteLocHelper = new MySQLiteLocHelper(Main2Activity.this);
+                int res = mySQLiteLocHelper.surveyInsert(userId, date.getTime() , answerStr);
             }
         }
     }
+
+    public class MyLocationListener implements LocationListener{
+        @Override
+
+        public void onLocationChanged(Location loc){
+            try {
+                currentLoc = mlocManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+                Log.d(TAG, "" + currentLoc.getLatitude());
+            } catch (SecurityException e) {
+
+            }
+
+        }
+        public void onProviderDisabled(String provider){
+
+            //nothing
+        }
+
+
+        public void onProviderEnabled(String provider){
+
+            //nothing
+        }
+
+        public void onStatusChanged(String provider, int status, Bundle extras){
+            //nothing
+        }
+    }/* End of Class MyLocationListener */
 }

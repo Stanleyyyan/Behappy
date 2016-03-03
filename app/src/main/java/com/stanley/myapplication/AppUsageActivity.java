@@ -26,6 +26,8 @@ import android.widget.SpinnerAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.stanley.myapplication.Locations.MySQLiteLocHelper;
+
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -39,6 +41,9 @@ public class AppUsageActivity extends AppCompatActivity {
     private static final String TAG = "AppUsage";
     UsageStatsManager mUsageStatsManager;
     private TextView statistics;
+
+    private MySQLiteLocHelper mySQLiteLocHelper;
+    private int userId = 1;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -78,10 +83,10 @@ public class AppUsageActivity extends AppCompatActivity {
             events.getNextEvent(eventOut);
             Date date = new Date(eventOut.getTimeStamp());
             s += eventOut.getPackageName() + ": " + String.valueOf(sdf.format(date)) + "\t";
-            if (eventOut.getEventType() == 7) {
-                //Date date = new Date(eventOut.getTimeStamp());
-                //s += eventOut.getPackageName() + String.valueOf(sdf.format(date)) + "\t";
-            }
+
+            mySQLiteLocHelper = new MySQLiteLocHelper(AppUsageActivity.this);
+            mySQLiteLocHelper.appInsert(userId, eventOut.getPackageName(), eventOut.getTimeStamp());
+
         }
         statistics.setText(s);
     }

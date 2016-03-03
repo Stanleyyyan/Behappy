@@ -1,4 +1,4 @@
-package com.stanley.myapplication;
+package com.stanley.myapplication.Locations;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -13,6 +13,7 @@ import android.os.Build;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.CompoundButton;
 import android.widget.ToggleButton;
 
@@ -24,6 +25,7 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.stanley.myapplication.R;
 
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
@@ -31,6 +33,7 @@ import java.util.Date;
 import java.util.Map;
 
 public class LocationActivity extends AppCompatActivity implements GoogleMap.OnMyLocationChangeListener{
+    private static final String TAG = "LocationActivity";
 
     private static final int MAP_ZOOM = 18; // Google Maps supports 1-21
 
@@ -57,6 +60,10 @@ public class LocationActivity extends AppCompatActivity implements GoogleMap.OnM
     private Date endDate;
     private Date startDate;
     private SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:SS");
+
+    private MySQLiteLocHelper mySQLiteLocHelper;
+
+    private int userId;
 
 
     @Override
@@ -140,6 +147,7 @@ public class LocationActivity extends AppCompatActivity implements GoogleMap.OnM
         locationManager.requestLocationUpdates(provider, 10000, 1, new LocationListener() {
             @Override
             public void onLocationChanged(Location location) {
+                Log.d(TAG, location.toString());
 
             }
 
@@ -177,29 +185,33 @@ public class LocationActivity extends AppCompatActivity implements GoogleMap.OnM
                 mMap.addMarker(new MarkerOptions().position(endLatLng).title("END"));
 
                 // create a dialog displaying the results
-                AlertDialog.Builder dialogBuilder =
-                        new AlertDialog.Builder(LocationActivity.this);
-                dialogBuilder.setTitle("RESULT");
+//                AlertDialog.Builder dialogBuilder =
+//                        new AlertDialog.Builder(LocationActivity.this);
+//                dialogBuilder.setTitle("RESULT");
 
                 double distanceKM = distance / 1000.0;
+                double maxRangeKM = maxRange / 1000.0;
 
                 long diff = endDate.getTime() - startDate.getTime();
-
                 long diffSeconds = diff / 1000 % 60;
+
 //                long diffMinutes = diff / (60 * 1000) % 60;
 //                long diffHours = diff / (60 * 60 * 1000) % 24;
 //                long diffDays = diff / (24 * 60 * 60 * 1000);
 
                 // display distanceTraveled traveled and average speed
-                dialogBuilder.setMessage("DISTANCE: " + distanceKM + " km"
-                        + "\nRANGE: " + String.format("%.2f", maxRange)  + "m"
-                        + "\nStart DATE: " + startDate
-                        + "\nEnd Date: " + endDate + "\nTime DIFF: " + diffSeconds);
+//                dialogBuilder.setMessage("DISTANCE: " + distanceKM + " km"
+//                        + "\nRANGE: " + String.format("%.2f", maxRange)  + "km"
+//                        + "\nStart DATE: " + startDate
+//                        + "\nEnd Date: " + endDate + "\nTime DIFF: " + diffSeconds);
+//
+//                dialogBuilder.setPositiveButton(
+//                        "OK", null);
+//
+//                dialogBuilder.show(); // display the dialog
 
-                dialogBuilder.setPositiveButton(
-                        "OK", null);
-
-                dialogBuilder.show(); // display the dialog
+                mySQLiteLocHelper = new MySQLiteLocHelper(LocationActivity.this);
+                mySQLiteLocHelper.insertLoc(userId, startDate.getTime(), distanceKM, maxRangeKM, diff);
 
 
             } else {
@@ -231,6 +243,14 @@ public class LocationActivity extends AppCompatActivity implements GoogleMap.OnM
         preLocation = currentLocation;
         currentLocation = location;
 
+        currentLatLng = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
+        CameraPosition cameraPosition = new CameraPosition.Builder()
+                .target(currentLatLng)
+                .zoom(MAP_ZOOM)
+                .bearing(0)
+                .build();
+        mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+
         if (tracking) {
 
             maxRange = Math.max(maxRange,currentLocation.distanceTo(startLocation));
@@ -240,7 +260,7 @@ public class LocationActivity extends AppCompatActivity implements GoogleMap.OnM
 
             //mMap.addMarker(new MarkerOptions().position(currentLatLng).title(currentLatLng.toString()));
 
-            CameraPosition cameraPosition = new CameraPosition.Builder()
+            cameraPosition = new CameraPosition.Builder()
                     .target(currentLatLng)
                     .zoom(MAP_ZOOM)
                     .bearing(0)
