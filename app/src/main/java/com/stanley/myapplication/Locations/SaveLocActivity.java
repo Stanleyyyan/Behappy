@@ -93,7 +93,7 @@ public class SaveLocActivity extends AppCompatActivity {
                 attributions = "";
             }
 
-            Log.d(TAG, "Place selected: " + placeId + " (" + name.toString() + ")" + " Address: " + address.toString());
+            Log.d(TAG, "la: " + la + " lon: " + lon);
             mySQLiteLocHelper = new MySQLiteLocHelper(SaveLocActivity.this);
             Log.d(TAG,""+new Date().getTime());
             int res = mySQLiteLocHelper.specialLocInsert(userId, la, lon, new Date().getTime(), 1);

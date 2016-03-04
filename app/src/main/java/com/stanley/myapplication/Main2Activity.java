@@ -1,5 +1,7 @@
 package com.stanley.myapplication;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.location.Criteria;
@@ -21,6 +23,7 @@ import android.widget.Button;
 import android.widget.Toast;
 
 import com.androidadvance.androidsurvey.SurveyActivity;
+import com.google.android.gms.maps.model.LatLng;
 import com.stanley.myapplication.Locations.LocationActivity;
 import com.stanley.myapplication.Locations.MySQLiteLocHelper;
 import com.stanley.myapplication.Locations.SaveLocActivity;
@@ -28,7 +31,9 @@ import com.stanley.myapplication.contactlist.ContactActivity;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 
 public class Main2Activity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -44,19 +49,27 @@ public class Main2Activity extends AppCompatActivity
     private Location preLoc;
     private Location startLoc;//for daily tracking
 
-    private double rangeAll;//for daily
-    private long distanceAll;//for daily
-    private long timeDiff;//for daily
+//    private double rangeAll;//for daily
+//    private long distanceAll;//for daily
+//    private long timeDiff;//for daily
+//    private long timeDiffForSpec;//for dailys
+
 
     private long distance;//for updating
+    private long timeDiffForSpec;
+    private long timeDiff;
 
 
     private int count;
     private Boolean tracking;
+    private Boolean trackingForSpec;
 
     private Date endDate;
     private Date startDate;
     private double range;
+
+    private Date inSpecTime;
+    private Date outSpecTime;
 
     private Location startLocation;//for short tracking
     private Location endLocation;//for short tracking
@@ -80,9 +93,23 @@ public class Main2Activity extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
+        //initialization
+        count = 0;
+        tracking = false;
+        trackingForSpec = false;
+        startDate = null;
+        endDate = null;
+        range = 0;
+//        rangeAll = 0;//for daily
+//        distanceAll = 0;//for daily
+//        timeDiff = 0;//for daily
+//        timeDiffForSpec = 0;
+
+
+        //set location manager
         try {
             distance = 0;
-            mlocManager = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
+            mlocManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
             LocationListener mlocListener = new MyLocationListener();
             Criteria criteria = new Criteria();
             criteria.setAccuracy(Criteria.ACCURACY_FINE);
@@ -116,6 +143,10 @@ public class Main2Activity extends AppCompatActivity
                 startActivity(intent);
             }
         });
+
+
+        setAlarmReceiver();
+        setRepeatedAlarmReceiver();
     }
 
     @Override
@@ -174,8 +205,14 @@ public class Main2Activity extends AppCompatActivity
             startActivity(intent);
 
         } else if (id == R.id.nav_map) {
-            Intent intent = new Intent(Main2Activity.this, LocationActivity.class);
-            startActivity(intent);
+//            Intent intent = new Intent(Main2Activity.this, LocationActivity.class);
+//            startActivity(intent);
+
+            mySQLiteLocHelper = new MySQLiteLocHelper(Main2Activity.this);
+            mySQLiteLocHelper.insertLoc(userId, new Date().getTime(), 20.0, 20.0, 20.0, 0);
+            mySQLiteLocHelper.insertLoc(userId, new Date().getTime(), 10.0, 10.0, 10.0, 0);
+            mySQLiteLocHelper.insertLoc(userId, new Date().getTime(), 0, 0, 10.0, 1);
+            mySQLiteLocHelper.insertLoc(userId, new Date().getTime(), 0, 0, 5.0, 1);
 
         } else if (id == R.id.nav_show_contacts) {
             Intent intent = new Intent(Main2Activity.this, ContactActivity.class);
@@ -225,35 +262,35 @@ public class Main2Activity extends AppCompatActivity
                     String[] substr = str_result[i].split(":");
                     char answer = substr[1].charAt(1);
                     answerStr = answerStr + answer;
-                    Log.d("final answer", ""+answer);
+                    Log.d("final answer", "" + answer);
                 }
 
                 mySQLiteLocHelper = new MySQLiteLocHelper(Main2Activity.this);
-                int res = mySQLiteLocHelper.surveyInsert(userId, date.getTime() , answerStr);
+                int res = mySQLiteLocHelper.surveyInsert(userId, date.getTime(), answerStr);
             }
         }
     }
 
     @Override
-    public void onResume(){
+    public void onResume() {
         super.onResume();
 
         try {
-            mlocManager = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
+            mlocManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
             LocationListener mlocListener = new MyLocationListener();
             Criteria criteria = new Criteria();
             criteria.setAccuracy(Criteria.ACCURACY_FINE);
-            mlocManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000, 10f, mlocListener);
+            mlocManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000, 0.0f, mlocListener);
 
         } catch (SecurityException e) {
 
         }
     }
 
-    public class MyLocationListener implements LocationListener{
+    public class MyLocationListener implements LocationListener {
 
         @Override
-        public void onLocationChanged(Location loc){
+        public void onLocationChanged(Location loc) {
             //Toast.makeText(Main2Activity.this, "changed", Toast.LENGTH_SHORT).show();
 
             if (currentLoc != null) {
@@ -264,69 +301,129 @@ public class Main2Activity extends AppCompatActivity
             if (loc != null) {
                 currentLoc = loc;
                 Log.d(TAG, "current: " + currentLoc.getLatitude());
+
+                //add location check
+                boolean ret = checkSpecialLocation(loc);
+
+                if (ret) {
+
+                    if (!trackingForSpec) {
+                        trackingForSpec = true;
+                        inSpecTime = new Date();
+                        Log.d(TAG, "start recording");
+                    }
+
+                } else {
+
+                    if (trackingForSpec) {
+                        trackingForSpec = false;
+
+                        outSpecTime = new Date();
+
+                        timeDiffForSpec = outSpecTime.getTime() - inSpecTime.getTime();//duration
+                        Log.d(TAG, "end recording");
+                        Log.d(TAG, "time in special" + timeDiffForSpec);
+
+                        mySQLiteLocHelper = new MySQLiteLocHelper(Main2Activity.this);
+                        mySQLiteLocHelper.insertLoc(userId, outSpecTime.getTime(), 0, 0, timeDiffForSpec, 1);
+                    }
+
+                }
+
             }
 
 
             if (preLoc != null) {
                 //distance = distance + (long) preLoc.distanceTo(currentLoc);
-                distance =(long) preLoc.distanceTo(currentLoc);
-                Log.d(TAG, "dis: " + distance);
+                distance = (long) preLoc.distanceTo(currentLoc);
+                Log.d(TAG, "distance: " + distance);
 
                 Toast.makeText(Main2Activity.this, "distance: " + distance, Toast.LENGTH_SHORT).show();
             }
 
             if (distance > 20) {
-                distanceAll = distanceAll + distance;
-                range = Math.max(range, currentLoc.distanceTo(startLocation));
 
-                if(!tracking){
+
+                if (!tracking) {
                     Log.d(TAG, "start tracking");
                     Toast.makeText(Main2Activity.this, "start tracking", Toast.LENGTH_SHORT).show();
 
                     startTracking(loc);
+                } else {
+//                    distanceAll = distanceAll + distance;
+                    range = Math.max(range, currentLoc.distanceTo(startLocation));
                 }
 
             }
 
             if (distance <= 10) {
-                count++;
 
-                if (count == 3) {
+                if (tracking) {
+                    count++;
+                    Log.d(TAG, "count: " + count);
 
-                    if (tracking){
+                    if (count == 3) {
                         Log.d(TAG, "stop tracking");
                         Toast.makeText(Main2Activity.this, "stop tracking", Toast.LENGTH_SHORT).show();
 
-                        rangeAll = rangeAll + range;
+//                        rangeAll = rangeAll + range;
                         stopTracking(loc);
+
 
                     }
 
-
                 }
+
+
             }
 
 
         }
-        public void onProviderDisabled(String provider){
+
+        public void onProviderDisabled(String provider) {
             //nothing
         }
 
 
-        public void onProviderEnabled(String provider){
+        public void onProviderEnabled(String provider) {
             //nothing
         }
 
-        public void onStatusChanged(String provider, int status, Bundle extras){
+        public void onStatusChanged(String provider, int status, Bundle extras) {
             //nothing
         }
 
+        public boolean checkSpecialLocation(Location location) {
+            mySQLiteLocHelper = new MySQLiteLocHelper(Main2Activity.this);
+            List<LatLng> list = mySQLiteLocHelper.readSpecial();
 
+            boolean ret = inSpecialLocation(list, location.getLongitude(), location.getLatitude(), 10);
+
+            return ret;
+
+        }
+
+        public boolean inSpecialLocation(List<LatLng> l, double curt_long, double curt_lat, double threshold) {
+            int len = l.size();
+            for (int i = 0; i < len; i++) {
+                double dis_long = l.get(i).longitude - curt_long;
+                double dis_lat = l.get(i).latitude - curt_lat;
+
+                Log.d(TAG, "" + l.get(i).longitude + " " + l.get(i).latitude);
+                double dis = Math.sqrt(dis_long * dis_long + dis_lat * dis_lat);
+                Log.d(TAG, "distance checked: " + dis + " ");
+
+                if (dis < threshold) {
+                    return true;
+                }
+            }
+            return false;
+        }
 
 
     }/* End of Class MyLocationListener */
 
-    public void startTracking(Location l){
+    public void startTracking(Location l) {
         tracking = true;
         endLocation = null;
         endDate = null;
@@ -336,22 +433,39 @@ public class Main2Activity extends AppCompatActivity
 
     }
 
-    public void stopTracking(Location l){
+    public void stopTracking(Location l) {
         tracking = false;
         count = 0;
 
         endDate = new Date();
-
         endLocation = l;
 
-        long diff = endDate.getTime() - startDate.getTime();
-
-        timeDiff = timeDiff + diff;
+        timeDiff = endDate.getTime() - startDate.getTime();
 
 
+//        timeDiff = timeDiff + diff;//duration
+//        Log.d(TAG, "duration: " + timeDiff);
+        mySQLiteLocHelper = new MySQLiteLocHelper(Main2Activity.this);
+        mySQLiteLocHelper.insertLoc(userId, endDate.getTime(), distance, range, timeDiff, 0);
+    }
 
+    public void setAlarmReceiver() {
+        Intent alarmIntent = new Intent(Main2Activity.this, AlarmReceiver.class);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(Main2Activity.this, 0, alarmIntent, 0);
 
+        AlarmManager manager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+        int interval = 1000 * 60 * 20;
 
+        /* Set the alarm to start at 11:30 PM */
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(System.currentTimeMillis());
+        calendar.set(Calendar.HOUR_OF_DAY, 23);
+        calendar.set(Calendar.MINUTE, 30);
+
+        manager.set(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pendingIntent);
+    }
+
+    public void setRepeatedAlarmReceiver(){
 
     }
 }
