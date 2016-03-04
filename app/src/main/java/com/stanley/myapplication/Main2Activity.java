@@ -2,6 +2,7 @@ package com.stanley.myapplication;
 
 import android.content.Context;
 import android.content.Intent;
+import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -17,6 +18,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Button;
+import android.widget.Toast;
 
 import com.androidadvance.androidsurvey.SurveyActivity;
 import com.stanley.myapplication.Locations.LocationActivity;
@@ -39,6 +41,27 @@ public class Main2Activity extends AppCompatActivity
 
     private LocationManager mlocManager;
     private Location currentLoc;
+    private Location preLoc;
+    private Location startLoc;//for daily tracking
+
+    private double rangeAll;//for daily
+    private long distanceAll;//for daily
+    private long timeDiff;//for daily
+
+    private long distance;//for updating
+
+
+    private int count;
+    private Boolean tracking;
+
+    private Date endDate;
+    private Date startDate;
+    private double range;
+
+    private Location startLocation;//for short tracking
+    private Location endLocation;//for short tracking
+
+
     MySQLiteLocHelper mySQLiteLocHelper;
 
     @Override
@@ -58,9 +81,14 @@ public class Main2Activity extends AppCompatActivity
         navigationView.setNavigationItemSelectedListener(this);
 
         try {
+            distance = 0;
             mlocManager = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
             LocationListener mlocListener = new MyLocationListener();
-            mlocManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000, 1, mlocListener);
+            Criteria criteria = new Criteria();
+            criteria.setAccuracy(Criteria.ACCURACY_FINE);
+            mlocManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 1f, mlocListener);
+            startLoc = mlocManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+            currentLoc = startLoc;
 
         } catch (SecurityException e) {
 
@@ -73,6 +101,7 @@ public class Main2Activity extends AppCompatActivity
                 double lon = 0.0;
                 double la = 0.0;
 
+                //save the location when users feel lonely
                 if (currentLoc != null) {
                     la = currentLoc.getLatitude();
                     lon = currentLoc.getLongitude();
@@ -82,6 +111,7 @@ public class Main2Activity extends AppCompatActivity
                     mySQLiteLocHelper.specialLocAddLonely(userId, la, lon, new Date().getTime(), 0);
                 }
 
+                //start app usage
                 Intent intent = new Intent(Main2Activity.this, AppUsageActivity.class);
                 startActivity(intent);
             }
@@ -204,31 +234,124 @@ public class Main2Activity extends AppCompatActivity
         }
     }
 
-    public class MyLocationListener implements LocationListener{
-        @Override
+    @Override
+    public void onResume(){
+        super.onResume();
 
+        try {
+            mlocManager = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
+            LocationListener mlocListener = new MyLocationListener();
+            Criteria criteria = new Criteria();
+            criteria.setAccuracy(Criteria.ACCURACY_FINE);
+            mlocManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000, 10f, mlocListener);
+
+        } catch (SecurityException e) {
+
+        }
+    }
+
+    public class MyLocationListener implements LocationListener{
+
+        @Override
         public void onLocationChanged(Location loc){
-            try {
-                currentLoc = mlocManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-                Log.d(TAG, "" + currentLoc.getLatitude());
-            } catch (SecurityException e) {
+            //Toast.makeText(Main2Activity.this, "changed", Toast.LENGTH_SHORT).show();
+
+            if (currentLoc != null) {
+                preLoc = currentLoc;
+                Log.d(TAG, "pre: " + preLoc.getLatitude());
+            }
+
+            if (loc != null) {
+                currentLoc = loc;
+                Log.d(TAG, "current: " + currentLoc.getLatitude());
+            }
+
+
+            if (preLoc != null) {
+                //distance = distance + (long) preLoc.distanceTo(currentLoc);
+                distance =(long) preLoc.distanceTo(currentLoc);
+                Log.d(TAG, "dis: " + distance);
+
+                Toast.makeText(Main2Activity.this, "distance: " + distance, Toast.LENGTH_SHORT).show();
+            }
+
+            if (distance > 20) {
+                distanceAll = distanceAll + distance;
+                range = Math.max(range, currentLoc.distanceTo(startLocation));
+
+                if(!tracking){
+                    Log.d(TAG, "start tracking");
+                    Toast.makeText(Main2Activity.this, "start tracking", Toast.LENGTH_SHORT).show();
+
+                    startTracking(loc);
+                }
 
             }
 
+            if (distance <= 10) {
+                count++;
+
+                if (count == 3) {
+
+                    if (tracking){
+                        Log.d(TAG, "stop tracking");
+                        Toast.makeText(Main2Activity.this, "stop tracking", Toast.LENGTH_SHORT).show();
+
+                        rangeAll = rangeAll + range;
+                        stopTracking(loc);
+
+                    }
+
+
+                }
+            }
+
+
         }
         public void onProviderDisabled(String provider){
-
             //nothing
         }
 
 
         public void onProviderEnabled(String provider){
-
             //nothing
         }
 
         public void onStatusChanged(String provider, int status, Bundle extras){
             //nothing
         }
+
+
+
+
     }/* End of Class MyLocationListener */
+
+    public void startTracking(Location l){
+        tracking = true;
+        endLocation = null;
+        endDate = null;
+        startDate = new Date();
+
+        startLocation = l;
+
+    }
+
+    public void stopTracking(Location l){
+        tracking = false;
+        count = 0;
+
+        endDate = new Date();
+
+        endLocation = l;
+
+        long diff = endDate.getTime() - startDate.getTime();
+
+        timeDiff = timeDiff + diff;
+
+
+
+
+
+
+    }
 }

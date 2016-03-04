@@ -15,6 +15,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.CompoundButton;
+import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -32,7 +33,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
 
-public class LocationActivity extends AppCompatActivity implements GoogleMap.OnMyLocationChangeListener{
+public class LocationActivity extends AppCompatActivity {
     private static final String TAG = "LocationActivity";
 
     private static final int MAP_ZOOM = 18; // Google Maps supports 1-21
@@ -62,6 +63,7 @@ public class LocationActivity extends AppCompatActivity implements GoogleMap.OnM
     private SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:SS");
 
     private MySQLiteLocHelper mySQLiteLocHelper;
+    private MyLocationListener myLocationListener;
 
     private int userId;
 
@@ -83,7 +85,6 @@ public class LocationActivity extends AppCompatActivity implements GoogleMap.OnM
                 mMap = ((SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map))
                         .getMap();
                 mMap.setMyLocationEnabled(true);
-                mMap.setOnMyLocationChangeListener(this);
 
                 // Check if we were successful in obtaining the map.
                 if (mMap != null) {
@@ -130,10 +131,10 @@ public class LocationActivity extends AppCompatActivity implements GoogleMap.OnM
 
     public void getMyCurrentLocation() {
 
-        if ( Build.VERSION.SDK_INT >= 23 &&
-                ContextCompat.checkSelfPermission(this.getBaseContext(), android.Manifest.permission.ACCESS_FINE_LOCATION ) != PackageManager.PERMISSION_GRANTED &&
+        if (Build.VERSION.SDK_INT >= 23 &&
+                ContextCompat.checkSelfPermission(this.getBaseContext(), android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
                 ContextCompat.checkSelfPermission(this.getBaseContext(), android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            return  ;
+            return;
         }
 
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
@@ -143,29 +144,9 @@ public class LocationActivity extends AppCompatActivity implements GoogleMap.OnM
         // Finds a provider that matches the criteria
         String provider = locationManager.getBestProvider(criteria, true);
         // Use the provider to get the last known location
+        myLocationListener = new MyLocationListener();
 
-        locationManager.requestLocationUpdates(provider, 10000, 1, new LocationListener() {
-            @Override
-            public void onLocationChanged(Location location) {
-                Log.d(TAG, location.toString());
-
-            }
-
-            @Override
-            public void onStatusChanged(String provider, int status, Bundle extras) {
-
-            }
-
-            @Override
-            public void onProviderEnabled(String provider) {
-
-            }
-
-            @Override
-            public void onProviderDisabled(String provider) {
-
-            }
-        });
+        locationManager.requestLocationUpdates(provider, 1000, 2, myLocationListener);
 
         currentLocation = locationManager.getLastKnownLocation(provider);
 
@@ -210,8 +191,8 @@ public class LocationActivity extends AppCompatActivity implements GoogleMap.OnM
 //
 //                dialogBuilder.show(); // display the dialog
 
-                mySQLiteLocHelper = new MySQLiteLocHelper(LocationActivity.this);
-                mySQLiteLocHelper.insertLoc(userId, startDate.getTime(), distanceKM, maxRangeKM, diff);
+//                mySQLiteLocHelper = new MySQLiteLocHelper(LocationActivity.this);
+//                mySQLiteLocHelper.insertLoc(userId, startDate.getTime(), distanceKM, maxRangeKM, diff);
 
 
             } else {
@@ -237,28 +218,35 @@ public class LocationActivity extends AppCompatActivity implements GoogleMap.OnM
     };
 
 
-    @Override
-    public void onMyLocationChange(Location location) {
+    public class MyLocationListener implements LocationListener {
+        @Override
 
-        preLocation = currentLocation;
-        currentLocation = location;
+        public void onLocationChanged(android.location.Location loc) {
+//            try {
+//                Log.d(TAG, "la1: "+loc.getLatitude());
+//
+//            } catch (SecurityException e) {
+//
+//            }
+            Toast.makeText(LocationActivity.this, "changed", Toast.LENGTH_SHORT).show();
 
-        currentLatLng = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
-        CameraPosition cameraPosition = new CameraPosition.Builder()
-                .target(currentLatLng)
-                .zoom(MAP_ZOOM)
-                .bearing(0)
-                .build();
-        mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+            preLocation = currentLocation;
+            currentLocation = loc;
 
-        if (tracking) {
+            Log.d(TAG, "la1: " + loc.getLatitude());
 
-            maxRange = Math.max(maxRange,currentLocation.distanceTo(startLocation));
+            currentLatLng = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
+            CameraPosition cameraPosition = new CameraPosition.Builder()
+                    .target(currentLatLng)
+                    .zoom(MAP_ZOOM)
+                    .bearing(0)
+                    .build();
+            mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
 
+
+            maxRange = Math.max(maxRange, currentLocation.distanceTo(startLocation));
             distance = distance + (long) preLocation.distanceTo(currentLocation);
 
-
-            //mMap.addMarker(new MarkerOptions().position(currentLatLng).title(currentLatLng.toString()));
 
             cameraPosition = new CameraPosition.Builder()
                     .target(currentLatLng)
@@ -267,7 +255,22 @@ public class LocationActivity extends AppCompatActivity implements GoogleMap.OnM
                     .build();
 
             mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+
         }
 
-    }
+        public void onProviderDisabled(String provider) {
+
+            //nothing
+        }
+
+
+        public void onProviderEnabled(String provider) {
+
+            //nothing
+        }
+
+        public void onStatusChanged(String provider, int status, Bundle extras) {
+            //nothing
+        }
+    }/* End of Class MyLocationListener */
 }
