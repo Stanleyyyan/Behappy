@@ -13,7 +13,7 @@ import com.stanley.myapplication.Locations.MySQLiteLocHelper;
 import java.util.Date;
 import java.util.List;
 
-public class AlarmReceiver extends BroadcastReceiver{
+public class AlarmReceiver extends BroadcastReceiver {
     private static final String TAG = "AlarmReceiver";
 
     MySQLiteLocHelper mySQLiteLocHelper;
@@ -22,21 +22,19 @@ public class AlarmReceiver extends BroadcastReceiver{
     private double distanceAll;
     private double rangeAll;
     private double durationAll;
-    private double durationAllForSpec;
 
     @Override
     public void onReceive(Context context, Intent intent) {
         distanceAll = 0;
         rangeAll = 0;
         durationAll = 0;
-        durationAllForSpec = 0;
 
         Toast.makeText(context, "I'm running", Toast.LENGTH_SHORT).show();
 
         mySQLiteLocHelper = new MySQLiteLocHelper(context);
 
         //get the data 1 and 2
-        List<LocationDaily> list =  mySQLiteLocHelper.getInfoLoc(userId);
+        List<LocationDaily> list = mySQLiteLocHelper.getInfoLoc(userId);
 
         Log.d(TAG, "size of list: " + list.size());
 
@@ -46,28 +44,23 @@ public class AlarmReceiver extends BroadcastReceiver{
 
         for (int i = 0; i < size; i++) {
             LocationDaily locationDaily = list.get(i);
-            if (locationDaily.getType()==0){
-                distanceAll = distanceAll + locationDaily.getDistance();
-                rangeAll = rangeAll + locationDaily.getRange();
-                durationAll = durationAll + locationDaily.getDuration();
-            }
+            distanceAll = distanceAll + locationDaily.getDistance();
+            rangeAll = rangeAll + locationDaily.getRange();
+            durationAll = durationAll + locationDaily.getDuration();
 
-            if (locationDaily.getType() == 1) {
-                durationAllForSpec = durationAllForSpec + locationDaily.getDurationSpec();
-            }
         }
 
-        Log.d(TAG, "0: " + distanceAll + " " + rangeAll + " " + durationAll);
-        Log.d(TAG, "1: " + durationAllForSpec);
+        Log.d(TAG, "result after adding all " + distanceAll + " " + rangeAll + " " + durationAll);
 
         LocationDaily locationDaily = new LocationDaily();
+        locationDaily.setUserId(userId);
+        locationDaily.setDate(new Date().getTime());
         locationDaily.setDistance(distanceAll);
         locationDaily.setRange(rangeAll);
         locationDaily.setDuration(durationAll);
-        locationDaily.setDurationSpec(durationAllForSpec);
 
         //put it back in one table
-        mySQLiteLocHelper.insertDailyUpload(userId, new Date().getTime(), locationDaily);
+        mySQLiteLocHelper.insertDailyUpload(locationDaily);
 
     }
 }

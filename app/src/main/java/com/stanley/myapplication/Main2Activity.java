@@ -25,6 +25,7 @@ import android.widget.Toast;
 import com.androidadvance.androidsurvey.SurveyActivity;
 import com.google.android.gms.maps.model.LatLng;
 import com.stanley.myapplication.Locations.LocationActivity;
+import com.stanley.myapplication.Locations.LocationBehappy;
 import com.stanley.myapplication.Locations.MySQLiteLocHelper;
 import com.stanley.myapplication.Locations.SaveLocActivity;
 import com.stanley.myapplication.contactlist.ContactActivity;
@@ -133,9 +134,11 @@ public class Main2Activity extends AppCompatActivity
                     la = currentLoc.getLatitude();
                     lon = currentLoc.getLongitude();
                     Log.d(TAG, "la" + la + "lon" + lon);
+                    int type = inSpecialLocation(lon, la, 10);
+                    Log.d(TAG, "type: " + type);
 
                     mySQLiteLocHelper = new MySQLiteLocHelper(Main2Activity.this);
-                    mySQLiteLocHelper.specialLocAddLonely(userId, la, lon, new Date().getTime(), 0);
+                    mySQLiteLocHelper.recordLocation(userId, type, new Date().getTime(), 0.0);
                 }
 
                 //start app usage
@@ -208,15 +211,11 @@ public class Main2Activity extends AppCompatActivity
 //            Intent intent = new Intent(Main2Activity.this, LocationActivity.class);
 //            startActivity(intent);
 
+            //testing
             mySQLiteLocHelper = new MySQLiteLocHelper(Main2Activity.this);
-            mySQLiteLocHelper.insertLoc(userId, new Date().getTime(), 20.0, 20.0, 20.0, 0);
-            mySQLiteLocHelper.insertLoc(userId, new Date().getTime(), 10.0, 10.0, 10.0, 0);
-            mySQLiteLocHelper.insertLoc(userId, new Date().getTime(), 0, 0, 10.0, 1);
-            mySQLiteLocHelper.insertLoc(userId, new Date().getTime(), 0, 0, 5.0, 1);
+            mySQLiteLocHelper.insertLoc(userId, new Date().getTime(), 20.0, 20.0, 20.0);
+            mySQLiteLocHelper.insertLoc(userId, new Date().getTime(), 10.0, 10.0, 10.0);
 
-        } else if (id == R.id.nav_show_contacts) {
-            Intent intent = new Intent(Main2Activity.this, ContactActivity.class);
-            startActivity(intent);
         } else if (id == R.id.nav_delete) {
             mySQLiteLocHelper = new MySQLiteLocHelper(Main2Activity.this);
             mySQLiteLocHelper.deleteAll(Main2Activity.this);
@@ -303,9 +302,9 @@ public class Main2Activity extends AppCompatActivity
                 Log.d(TAG, "current: " + currentLoc.getLatitude());
 
                 //add location check
-                boolean ret = checkSpecialLocation(loc);
+                int ret = inSpecialLocation(loc.getLongitude(), loc.getLatitude(), 10);
 
-                if (ret) {
+                if (ret > 0) {
 
                     if (!trackingForSpec) {
                         trackingForSpec = true;
@@ -325,7 +324,7 @@ public class Main2Activity extends AppCompatActivity
                         Log.d(TAG, "time in special" + timeDiffForSpec);
 
                         mySQLiteLocHelper = new MySQLiteLocHelper(Main2Activity.this);
-                        mySQLiteLocHelper.insertLoc(userId, outSpecTime.getTime(), 0, 0, timeDiffForSpec, 1);
+                        mySQLiteLocHelper.recordLocation(userId, ret, outSpecTime.getTime(), timeDiffForSpec);
                     }
 
                 }
@@ -368,16 +367,10 @@ public class Main2Activity extends AppCompatActivity
 
 //                        rangeAll = rangeAll + range;
                         stopTracking(loc);
-
-
                     }
 
                 }
-
-
             }
-
-
         }
 
         public void onProviderDisabled(String provider) {
@@ -393,35 +386,28 @@ public class Main2Activity extends AppCompatActivity
             //nothing
         }
 
-        public boolean checkSpecialLocation(Location location) {
-            mySQLiteLocHelper = new MySQLiteLocHelper(Main2Activity.this);
-            List<LatLng> list = mySQLiteLocHelper.readSpecial();
-
-            boolean ret = inSpecialLocation(list, location.getLongitude(), location.getLatitude(), 10);
-
-            return ret;
-
-        }
-
-        public boolean inSpecialLocation(List<LatLng> l, double curt_long, double curt_lat, double threshold) {
-            int len = l.size();
-            for (int i = 0; i < len; i++) {
-                double dis_long = l.get(i).longitude - curt_long;
-                double dis_lat = l.get(i).latitude - curt_lat;
-
-                Log.d(TAG, "" + l.get(i).longitude + " " + l.get(i).latitude);
-                double dis = Math.sqrt(dis_long * dis_long + dis_lat * dis_lat);
-                Log.d(TAG, "distance checked: " + dis + " ");
-
-                if (dis < threshold) {
-                    return true;
-                }
-            }
-            return false;
-        }
-
 
     }/* End of Class MyLocationListener */
+
+    public int inSpecialLocation(double curt_long, double curt_lat, double threshold) {
+        mySQLiteLocHelper = new MySQLiteLocHelper(Main2Activity.this);
+        List<LatLng> list = mySQLiteLocHelper.readSpecial();
+
+        int len = list.size();
+        for (int i = 0; i < len; i++) {
+            double dis_long = list.get(i).longitude - curt_long;
+            double dis_lat = list.get(i).latitude - curt_lat;
+
+            Log.d(TAG, "" + list.get(i).longitude + " " + list.get(i).latitude);
+            double dis = Math.sqrt(dis_long * dis_long + dis_lat * dis_lat);
+            Log.d(TAG, "distance checked: " + dis + " ");
+
+            if (dis < threshold) {
+                return i;
+            }
+        }
+        return 0;
+    }
 
     public void startTracking(Location l) {
         tracking = true;
@@ -446,39 +432,41 @@ public class Main2Activity extends AppCompatActivity
 //        timeDiff = timeDiff + diff;//duration
 //        Log.d(TAG, "duration: " + timeDiff);
         mySQLiteLocHelper = new MySQLiteLocHelper(Main2Activity.this);
-        mySQLiteLocHelper.insertLoc(userId, endDate.getTime(), distance, range, timeDiff, 0);
+        mySQLiteLocHelper.insertLoc(userId, endDate.getTime(), distance, range, timeDiff);
     }
 
     public void setAlarmReceiver() {
         Intent alarmIntent = new Intent(Main2Activity.this, AlarmReceiver.class);
         PendingIntent pendingIntent = PendingIntent.getBroadcast(Main2Activity.this, 0, alarmIntent, 0);
+        int interval = 1000 * 60 * 60 * 24;
 
         AlarmManager manager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
 
         /* Set the alarm to start at 11:30 PM */
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(System.currentTimeMillis());
-        calendar.set(Calendar.HOUR_OF_DAY, 13);
-        calendar.set(Calendar.MINUTE, 36);
+        calendar.set(Calendar.HOUR_OF_DAY, 23);
+        calendar.set(Calendar.MINUTE, 30);
 
-        manager.set(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pendingIntent);
+        manager.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), interval,pendingIntent);
     }
 
-    public void setRepeatedAlarmReceiver(){
+    public void setRepeatedAlarmReceiver() {
         Intent alarmIntent = new Intent(Main2Activity.this, RepeatedAlarmReceiver.class);
         PendingIntent pendingIntent = PendingIntent.getBroadcast(Main2Activity.this, 0, alarmIntent, 0);
 
         AlarmManager manager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-        int interval = 1000 * 60 * 10;
+        int interval = 1000 * 60 * 60 * 24;
 
-        /* Set the alarm to start at 11:30 PM */
+
+        /* Set the alarm to start at 5:10 PM */
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(System.currentTimeMillis());
-        calendar.set(Calendar.HOUR_OF_DAY, 13);
-        calendar.set(Calendar.MINUTE, 36);
+        calendar.set(Calendar.HOUR_OF_DAY, 17);
+        calendar.set(Calendar.MINUTE, 10);
 
 
-        /* Repeat every 10 minutes*/
+        /* Repeat every day*/
         manager.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), interval, pendingIntent);
 
     }

@@ -11,10 +11,6 @@
         <item
             android:id="@+id/nav_contact"
             android:title="Categorize Contacts" />
-
-        <item
-            android:id="@+id/nav_show_contacts"
-            android:title="Show Recent Contacts"/>
     </group>
 
     <item android:title="Status">

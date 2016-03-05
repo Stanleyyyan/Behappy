@@ -20,15 +20,25 @@ public class MySQLiteLocHelper extends SQLiteOpenHelper {
 
     private final static int DB_VERSION = 10;
     private final static String DATABASE_NAME = "locations.db";
+
+
     private final static String CREATE_TABLE_LOCATIONS = "create table locations (userId Integer, date Integer," +
-            "distance real, range real, duration real, type Integer)";//0 -- moving ; 1 -- special
+            "distance real, range real, duration real)";
+
+    //upload
+    private final static String CREATE_TABLE_RECORDLOCATIONS = "create table recordlocations (userId Integer, type Integer, " +
+            "date Integer, duration real)";//0 -- button; 1,2,3 -- special
+
     private final static String CREATE_TABLE_SPECLOCATIONS = "create table speclocations (userId Integer, id Integer, " +
-            "latitude real, longitude real, date Integer, type Integer)";//0 -- button; 1 -- special
+            "latitude real, longitude real, type Integer)";//1 -- home, 2 -- family friends, 3 -- business
+    //upload
     private final static String CREATE_TABLE_SURVEY = "create table survey (userId Integer, date Integer, answers text)";
+    //uplad
     private final static String CREATE_TABLE_APP = "create table app (userId Integer, appname text, time Integer)";
 
+    //upload
     private final static String CREATE_TABLE_DAILY_UPLOAD = "create table upload (userId Integer, date Integer, " +
-            "distance real, range real, duration real, durationSpec real)";
+            "distance real, range real, duration real)";
 
     private DatabaseHelper databaseHelper;
 
@@ -41,6 +51,7 @@ public class MySQLiteLocHelper extends SQLiteOpenHelper {
 
         sqLiteDatabase.execSQL(CREATE_TABLE_LOCATIONS);
         sqLiteDatabase.execSQL(CREATE_TABLE_SPECLOCATIONS);
+        sqLiteDatabase.execSQL(CREATE_TABLE_RECORDLOCATIONS);
         sqLiteDatabase.execSQL(CREATE_TABLE_SURVEY);
         sqLiteDatabase.execSQL(CREATE_TABLE_APP);
         sqLiteDatabase.execSQL(CREATE_TABLE_DAILY_UPLOAD);
@@ -57,6 +68,7 @@ public class MySQLiteLocHelper extends SQLiteOpenHelper {
             if (oldVersion < 10) {
                 sqLiteDatabase.execSQL(CREATE_TABLE_LOCATIONS);
                 sqLiteDatabase.execSQL(CREATE_TABLE_SPECLOCATIONS);
+                sqLiteDatabase.execSQL(CREATE_TABLE_RECORDLOCATIONS);
                 sqLiteDatabase.execSQL(CREATE_TABLE_SURVEY);
                 sqLiteDatabase.execSQL(CREATE_TABLE_APP);
                 sqLiteDatabase.execSQL(CREATE_TABLE_DAILY_UPLOAD);
@@ -72,17 +84,17 @@ public class MySQLiteLocHelper extends SQLiteOpenHelper {
      * uplad daily
      ****************************************/
 
-    public void insertDailyUpload(int id, long date, LocationDaily locationDaily){
+    public void insertDailyUpload(LocationDaily locationDaily) {
         //userId Integer, date Integer, " + "distance real, range real, duration real, durationSpec real
 
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues initialValues = new ContentValues();
-        initialValues.put("userId", id);
-        initialValues.put("date", date);
+        initialValues.put("userId", locationDaily.getUserId());
+        initialValues.put("date", locationDaily.getDate());
         initialValues.put("distance", locationDaily.getDistance());
         initialValues.put("range", locationDaily.getRange());
         initialValues.put("duration", locationDaily.getDuration());
-        initialValues.put("durationSpec", locationDaily.getDurationSpec());
+
         Log.d(TAG, initialValues.toString());
         db.insert("upload", null, initialValues);
 
@@ -90,7 +102,7 @@ public class MySQLiteLocHelper extends SQLiteOpenHelper {
 
     }
 
-    public LocationDaily getDailyUpload(){
+    public LocationDaily getDailyUpload() {
         SQLiteDatabase db = this.getReadableDatabase();
         LocationDaily locationDaily = new LocationDaily();
 
@@ -105,8 +117,8 @@ public class MySQLiteLocHelper extends SQLiteOpenHelper {
                 locationDaily.setDistance(cursor.getDouble(2));
                 locationDaily.setRange(cursor.getDouble(3));
                 locationDaily.setDuration(cursor.getDouble(4));
-                locationDaily.setDurationSpec(cursor.getDouble(5));
-                Log.d(TAG, "get upload daily : " + cursor.getDouble(4) + " " + cursor.getDouble(5));
+
+                Log.d(TAG, "get upload daily : " + cursor.getDouble(4));
             }
         }
 
@@ -119,12 +131,13 @@ public class MySQLiteLocHelper extends SQLiteOpenHelper {
 
     /**************************************
      * locations
+     * <p>
+     * "create table locations (userId Integer, date Integer," +
+     * "distance real, range real, duration real)";
      ****************************************/
 
-    public int insertLoc(int id, long date, double dist, double range, double duration, int type) {
+    public int insertLoc(int id, long date, double dist, double range, double duration) {
         SQLiteDatabase db = this.getWritableDatabase();
-
-        //userId Integer, name text, latitude real, longitude real, times Integer, duration real, type Integer
 
         ContentValues initialValues = new ContentValues();
         initialValues.put("userId", id);
@@ -132,7 +145,7 @@ public class MySQLiteLocHelper extends SQLiteOpenHelper {
         initialValues.put("distance", dist);
         initialValues.put("range", range);
         initialValues.put("duration", duration);
-        initialValues.put("type", type);
+
         Log.d(TAG, initialValues.toString());
         db.insert("locations", null, initialValues);
         int count = testForLocation();
@@ -153,7 +166,7 @@ public class MySQLiteLocHelper extends SQLiteOpenHelper {
 
     public List<LocationDaily> getInfoLoc(int userId) {
         SQLiteDatabase db = this.getReadableDatabase();
-        String request = "select distance, range, duration, type from locations where userId = '" + userId + "'";
+        String request = "select date, distance, range, duration from locations where userId = '" + userId + "'";
         Cursor cursor = db.rawQuery(request, new String[]{});
 
         List<LocationDaily> list = new ArrayList<LocationDaily>();
@@ -162,18 +175,10 @@ public class MySQLiteLocHelper extends SQLiteOpenHelper {
             for (int i = 0; i < cursor.getCount(); i++) {
                 cursor.moveToPosition(i);
                 LocationDaily locationDaily = new LocationDaily();
-                locationDaily.setDistance(cursor.getDouble(0));
-                locationDaily.setRange(cursor.getDouble(1));
-
-                if (cursor.getInt(3) == 0) {
-                    locationDaily.setDuration(cursor.getDouble(2));
-                }
-
-                if (cursor.getInt(3) == 1) {
-                    locationDaily.setDurationSpec(cursor.getDouble(2));
-                }
-
-                locationDaily.setType(cursor.getInt(3));
+                locationDaily.setDate(cursor.getLong(0));
+                locationDaily.setDistance(cursor.getDouble(1));
+                locationDaily.setRange(cursor.getDouble(2));
+                locationDaily.setDuration(cursor.getDouble(3));
                 list.add(locationDaily);
                 Log.d(TAG, "get location daily : " + cursor.getDouble(0) + " " + cursor.getDouble(1) +
                         " " + cursor.getDouble(2) + " " + cursor.getInt(3));
@@ -187,22 +192,47 @@ public class MySQLiteLocHelper extends SQLiteOpenHelper {
 
     }
 
+    /**************************************
+     * Record Locations
+     * <p>
+     * "create table recordlocations (userId Integer, type Integer, " +
+     * "date Integer, duration real)";//0 -- button; 1,2,3 -- special
+     ****************************************/
+
+    public void recordLocation(int userId, int type, long date, double duration) {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        ContentValues initialValues = new ContentValues();
+        initialValues.put("userId", userId);
+        initialValues.put("type", type);
+        initialValues.put("date", date);
+        initialValues.put("duration", duration);
+
+        Log.d(TAG, initialValues.toString());
+        db.insert("recordlocations", null, initialValues);
+
+        db.close();
+
+    }
+
 
     /**************************************
      * Special Locations
+     * <p>
+     * create table speclocations (userId Integer, id Integer, " +
+     * "latitude real, longitude real, date Integer, type Integer)"
      ****************************************/
 
-    public int specialLocInsert(int userId, double la, double lon, long date, int type) {
+    public int specialLocInsert(int userId, LocationBehappy locationBehappy) {
         SQLiteDatabase db = this.getWritableDatabase();
 
         ContentValues initialValues = new ContentValues();
         initialValues.put("userId", userId);
         int id = testForSpecialLoc() + 1;
-        initialValues.put("id", id);
-        initialValues.put("latitude", la);
-        initialValues.put("longitude", lon);
-        initialValues.put("date", date);
-        initialValues.put("type", type);
+        initialValues.put("id", id);//start from 1
+        initialValues.put("latitude", locationBehappy.getLatitude());
+        initialValues.put("longitude", locationBehappy.getLongitude());
+        initialValues.put("type", locationBehappy.getType());
 
         Log.d(TAG, initialValues.toString());
         db.insert("speclocations", null, initialValues);
@@ -210,26 +240,25 @@ public class MySQLiteLocHelper extends SQLiteOpenHelper {
         int count = testForSpecialLoc();
         db.close();
         return count;
-
     }
 
-    public void specialLocAddLonely(int userId, double la, double lon, long date, int type) {
-        SQLiteDatabase db = this.getWritableDatabase();
-
-        ContentValues initialValues = new ContentValues();
-        initialValues.put("userId", userId);
-        initialValues.put("id", 0);
-        initialValues.put("latitude", la);
-        initialValues.put("longitude", lon);
-        initialValues.put("date", date);
-        initialValues.put("type", type);
-
-        Log.d(TAG, initialValues.toString());
-        db.insert("speclocations", null, initialValues);
-
-        db.close();
-
-    }
+//    public void specialLocAddLonely(int userId, double la, double lon, long date, int type) {
+//        SQLiteDatabase db = this.getWritableDatabase();
+//
+//        ContentValues initialValues = new ContentValues();
+//        initialValues.put("userId", userId);
+//        initialValues.put("id", 0);
+//        initialValues.put("latitude", la);
+//        initialValues.put("longitude", lon);
+//        initialValues.put("date", date);
+//        initialValues.put("type", type);
+//
+//        Log.d(TAG, initialValues.toString());
+//        db.insert("speclocations", null, initialValues);
+//
+//        db.close();
+//
+//    }
 
     public int testForSpecialLoc() {
         SQLiteDatabase db = this.getReadableDatabase();
@@ -241,16 +270,16 @@ public class MySQLiteLocHelper extends SQLiteOpenHelper {
         return count;
     }
 
-    public int testForSpecial() {
-        SQLiteDatabase db = this.getReadableDatabase();
-        Cursor mCount = db.rawQuery("select count(*) from speclocations", null);
-        mCount.moveToFirst();
-        int count = mCount.getInt(0);
-        mCount.close();
-        db.close();
-
-        return count;
-    }
+//    public int testForSpecial() {
+//        SQLiteDatabase db = this.getReadableDatabase();
+//        Cursor mCount = db.rawQuery("select count(*) from speclocations", null);
+//        mCount.moveToFirst();
+//        int count = mCount.getInt(0);
+//        mCount.close();
+//        db.close();
+//
+//        return count;
+//    }
 
     public List<LatLng> readSpecial() {
 
@@ -269,8 +298,8 @@ public class MySQLiteLocHelper extends SQLiteOpenHelper {
                 list.add(item);
                 //Log.d(TAG, "read from sql la: "+cursor.getDouble(0));
             }
-
         }
+
         cursor.close();
         db.close();
 
