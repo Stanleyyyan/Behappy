@@ -4,9 +4,14 @@ import android.app.Activity;
 import android.content.AsyncQueryHandler;
 import android.content.ContentResolver;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.CallLog;
+
+import com.stanley.myapplication.MySQLiteHelper;
+import com.stanley.myapplication.MySQLiteLocHelper;
+import com.stanley.myapplication.contactlist.ContactActivity;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -20,6 +25,8 @@ public class ContactrecordActivity extends Activity {
     private AsyncQueryHandler asyncQuery;
     private List<ContactRecord> callLogs;
 
+    private MySQLiteLocHelper mySQLiteLocHelper;
+    public MySQLiteHelper myHelper;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -74,24 +81,47 @@ public class ContactrecordActivity extends Activity {
                     contrcd.setContactName(cachedName);
                     contrcd.setContrcdDateTime(sfd.format(date));
                     contrcd.setContrcdType(type);
+                    contrcd.setDuration(duration);
                     if (null == cachedName || "".equals(cachedName)) {
                         contrcd.setContactName(number);
                     }
                     callLogs.add(contrcd);
                 }
                 if (callLogs.size() > 0) {
+                    myHelper = new MySQLiteHelper(ContactrecordActivity.this, "my.db", null, 1);
+                    SQLiteDatabase dbr = myHelper.getReadableDatabase();
+                    Cursor dbcursor;
+                    int categoryTag = 0;
                     for(int i=0;i<callLogs.size();i++){
+                        categoryTag = 0;
                         ContactRecord each = callLogs.get(i);
-                        System.out.println("id: "+each.getContrcdId()
-                        +"\nname: "+each.getContactName()
-                        +"\ndate: "+each.getContrcdDateTime()
-                        +"\ntype: "+each.getContrcdType()
-                        +"\n");
+                        String tempname = each.getContactName();
+                        dbcursor = dbr.query("ContactList", new String[]{"categoryTag"}, "contactName=?", new String[]{tempname}, null, null, null);
+                        //System.out.println(dbcursor.moveToFirst());
+
+                        if(dbcursor.moveToFirst()){
+                            categoryTag = dbcursor.getInt(0);
+                            //System.out.println("dbcategory: "+categoryTag);
+                        }
+
+
+
+//                        System.out.println("id: "+each.getContrcdId()
+//                                +"\nname: "+each.getContactName()
+//                                +"\ndate: "+each.getContrcdDateTime()
+//                                +"\ntype: "+each.getContrcdType()
+//                                +each.getDuration()
+//                                +"\ncategory: "+categoryTag);
+
+                        mySQLiteLocHelper = new MySQLiteLocHelper(ContactrecordActivity.this);
+                        mySQLiteLocHelper.insertContact(1, each.getContrcdId(), each.getContactName(), each.getContrcdDateTime(),
+                                each.getContrcdType(), each.getDuration(), categoryTag);
                     }
                 }
             }
             super.onQueryComplete(token, cookie, cursor);
         }
     }
+
 
 }

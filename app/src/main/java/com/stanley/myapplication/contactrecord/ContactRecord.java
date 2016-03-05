@@ -9,6 +9,7 @@ public class ContactRecord {
     private String contactName;
     private String contrcdDateTime;//--MM-dd hh:mm
     private int contrcdType;
+    private long duration;
     //--1: incoming
     //--2: outgoing
     //--3: miss
@@ -41,4 +42,11 @@ public class ContactRecord {
         this.contrcdType = contrcdType;
     }
 
+    public long getDuration() {
+        return duration;
+    }
+
+    public void setDuration(long duration) {
+        this.duration = duration;
+    }
 }

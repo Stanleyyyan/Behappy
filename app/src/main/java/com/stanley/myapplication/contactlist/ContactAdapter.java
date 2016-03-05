@@ -61,7 +61,9 @@ public class ContactAdapter extends BaseAdapter {
         ContactList contact = list.get(position);
         final String name = contact.getContactName();
         int category = contact.getCategoryTag();
+        //System.out.println("name: " + name + "\nCategoryTag: " + category + "\n");
         holder.name.setText(name);
+        holder.category.setSelection(category, true);
         holder.category.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> arg0, View arg1, int arg2,

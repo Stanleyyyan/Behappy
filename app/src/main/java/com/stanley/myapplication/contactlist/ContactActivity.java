@@ -29,15 +29,19 @@ public class ContactActivity extends Activity{
     private HashMap<String, ContactList> contactIdMap = null;
 
     public static MySQLiteHelper myHelper;
-
+    public SQLiteDatabase dbw, dbr;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        myHelper = new MySQLiteHelper(this, "my.db", null, 1);
+
         setContentView(R.layout.contact_manage);
+        myHelper = new MySQLiteHelper(this, "my.db", null, 1);
+        dbw = myHelper.getWritableDatabase();
+        dbr = myHelper.getReadableDatabase();
         ContactListView = (ListView) findViewById(R.id.ContactListView);
-        // 实例化  
+        // 实例化
+
         asyncQueryHandler = new MyAsyncQueryHandler(getContentResolver());
         init();
 
@@ -46,14 +50,14 @@ public class ContactActivity extends Activity{
     //---------------初始化数据库查询参数--------------//
     private void init() {
         Uri uri = ContactsContract.CommonDataKinds.Phone.CONTENT_URI; // 联系人Uri；
-        // 查询的字段  
+        // 查询的字段
         String[] projection = { ContactsContract.CommonDataKinds.Phone._ID,
                 ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME,
                 ContactsContract.CommonDataKinds.Phone.DATA1, "sort_key",
                 ContactsContract.CommonDataKinds.Phone.CONTACT_ID,
                 ContactsContract.CommonDataKinds.Phone.PHOTO_ID,
                 ContactsContract.CommonDataKinds.Phone.LOOKUP_KEY };
-        // 按照sort_key升序查詢  
+        // 按照sort_key升序查詢
         asyncQueryHandler.startQuery(0, null, uri, projection, null, null,
                 "sort_key COLLATE LOCALIZED asc");
     }
@@ -68,13 +72,13 @@ public class ContactActivity extends Activity{
             if (cursor != null && cursor.getCount() > 0) {
                 contactIdMap = new HashMap<String, ContactList>();
                 list = new ArrayList<ContactList>();
-                cursor.moveToFirst(); // 游标移动到第一项  
+                cursor.moveToFirst(); // 游标移动到第一项
                 for (int i = 0, contactId = 0; i < cursor.getCount(); i++) {
                     cursor.moveToPosition(i);
                     String name = cursor.getString(1);
                     if (contactIdMap.containsKey(name)) {// 无操作
                     } else {
-                        // 创建联系人对象  
+                        // 创建联系人对象
                         ContactList contact = new ContactList();
                         contact.setContactName(name);
                         contact.setContactId(contactId);
@@ -94,8 +98,7 @@ public class ContactActivity extends Activity{
 
     private void setAdapter(List<ContactList> list) {
 
-        SQLiteDatabase dbw = myHelper.getWritableDatabase();
-        SQLiteDatabase dbr = myHelper.getReadableDatabase();
+
         //--create table ContactList
         dbw.execSQL("create table if not exists ContactList("
                 + "ContactId integer,"
@@ -105,25 +108,33 @@ public class ContactActivity extends Activity{
         Boolean ifExist = false;
         Cursor cursor = dbr.query("ContactList", null, null, null, null, null, "contactName asc");
         int nameIndex = cursor.getColumnIndex("contactName");
+        int tagIndex = cursor.getColumnIndex("categoryTag");
         //--check if ContactList table is already exist
         if(cursor.moveToFirst()){
+            System.out.println("update");
             //--exist, insert not recorded
             for (int i = 0; i < list.size(); i++) {
                 ContactList each = list.get(i);
                 String contactName = each.getContactName();
+                //System.out.println("contactName: "+ contactName);
                 for (cursor.moveToFirst(); !(cursor.isAfterLast()); cursor.moveToNext()) {
                     String tempname = cursor.getString(nameIndex);
                     if(tempname.toString().equals(contactName)){
+                        each.setCategoryTag(cursor.getInt(tagIndex));
+                        list.set(i, each);
                         ifExist = true;break;
                     }
                 }
                 if(!ifExist){
                     dbw.execSQL("insert into ContactList(ContactId, contactName, categoryTag) values("
-                            + each.getContactId() + ","+each.getContactName() + "," + each.getCategoryTag() + ")");
+                            + each.getContactId() + ",'"+each.getContactName() + "'," + each.getCategoryTag() + ")");
                 }
+                //System.out.println("ifExist: "+ ifExist);
+                ifExist = false;
             }
         }else{
             //--input all
+            System.out.println("input all");
             for (int i = 0; i < list.size(); i++){
                 ContactList each = list.get(i);
                 dbw.execSQL("insert into ContactList(ContactId, contactName, categoryTag) values("

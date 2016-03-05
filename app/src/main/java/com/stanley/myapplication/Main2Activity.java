@@ -19,19 +19,18 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.Toast;
 
 import com.androidadvance.androidsurvey.SurveyActivity;
 import com.google.android.gms.maps.model.LatLng;
-import com.stanley.myapplication.Locations.LocationActivity;
-import com.stanley.myapplication.Locations.LocationBehappy;
-import com.stanley.myapplication.Locations.MySQLiteLocHelper;
 import com.stanley.myapplication.Locations.SaveLocActivity;
 import com.stanley.myapplication.contactlist.ContactActivity;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -61,7 +60,8 @@ public class Main2Activity extends AppCompatActivity
     private long timeDiff;
 
 
-    private int count;
+    private List<Integer> count1;
+    private List<Integer> count2;
     private Boolean tracking;
     private Boolean trackingForSpec;
 
@@ -95,7 +95,8 @@ public class Main2Activity extends AppCompatActivity
         navigationView.setNavigationItemSelectedListener(this);
 
         //initialization
-        count = 0;
+        count1 = new ArrayList<Integer>();
+        count2 = new ArrayList<Integer>();
         tracking = false;
         trackingForSpec = false;
         startDate = null;
@@ -114,7 +115,7 @@ public class Main2Activity extends AppCompatActivity
             LocationListener mlocListener = new MyLocationListener();
             Criteria criteria = new Criteria();
             criteria.setAccuracy(Criteria.ACCURACY_FINE);
-            mlocManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 1f, mlocListener);
+            mlocManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 10000, 10f, mlocListener);
             startLoc = mlocManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
             currentLoc = startLoc;
 
@@ -135,21 +136,20 @@ public class Main2Activity extends AppCompatActivity
                     lon = currentLoc.getLongitude();
                     Log.d(TAG, "la" + la + "lon" + lon);
                     int type = inSpecialLocation(lon, la, 10);
-                    Log.d(TAG, "type: " + type);
+                    Log.d(TAG, "type after button: " + type);
 
                     mySQLiteLocHelper = new MySQLiteLocHelper(Main2Activity.this);
                     mySQLiteLocHelper.recordLocation(userId, type, new Date().getTime(), 0.0);
                 }
 
                 //start app usage
-                Intent intent = new Intent(Main2Activity.this, AppUsageActivity.class);
-                startActivity(intent);
+//                Intent intent = new Intent(Main2Activity.this, AppUsageActivity.class);
+//                startActivity(intent);
             }
         });
 
 
         setAlarmReceiver();
-        setRepeatedAlarmReceiver();
     }
 
     @Override
@@ -213,8 +213,11 @@ public class Main2Activity extends AppCompatActivity
 
             //testing
             mySQLiteLocHelper = new MySQLiteLocHelper(Main2Activity.this);
-            mySQLiteLocHelper.insertLoc(userId, new Date().getTime(), 20.0, 20.0, 20.0);
-            mySQLiteLocHelper.insertLoc(userId, new Date().getTime(), 10.0, 10.0, 10.0);
+            mySQLiteLocHelper.recordLocation(1, 0, new Date().getTime(), 0);
+            mySQLiteLocHelper.recordLocation(1, 1, new Date().getTime(), 2000.0);
+
+            int ret = mySQLiteLocHelper.getNumRecord(0);
+            Log.d(TAG, "test: " + ret);
 
         } else if (id == R.id.nav_delete) {
             mySQLiteLocHelper = new MySQLiteLocHelper(Main2Activity.this);
@@ -304,6 +307,9 @@ public class Main2Activity extends AppCompatActivity
                 //add location check
                 int ret = inSpecialLocation(loc.getLongitude(), loc.getLatitude(), 10);
 
+                Log.d(TAG, "type here: " + ret);
+
+
                 if (ret > 0) {
 
                     if (!trackingForSpec) {
@@ -340,17 +346,45 @@ public class Main2Activity extends AppCompatActivity
                 Toast.makeText(Main2Activity.this, "distance: " + distance, Toast.LENGTH_SHORT).show();
             }
 
-            if (distance > 20) {
+            if (distance > 15) {
 
 
                 if (!tracking) {
-                    Log.d(TAG, "start tracking");
-                    Toast.makeText(Main2Activity.this, "start tracking", Toast.LENGTH_SHORT).show();
+                    if (count1.size() == 3) {
+                        Log.d(TAG, "count1: " + count1.get(0) + " " + count1.get(1) + " " + count1.get(2));
 
-                    startTracking(loc);
+                        if (checkContinue(count1)) {
+                            Log.d(TAG, "start tracking");
+                            Toast.makeText(Main2Activity.this, "start tracking", Toast.LENGTH_SHORT).show();
+
+                            startTracking(loc);
+                        } else {
+                            count1.clear();
+                            Log.d(TAG, "clear count1");
+
+                        }
+                    } else {
+                        count1.add(1);
+                        Log.d(TAG, "count1 size: " + count1.size());
+
+                    }
                 } else {
 //                    distanceAll = distanceAll + distance;
                     range = Math.max(range, currentLoc.distanceTo(startLocation));
+                }
+
+            } else {
+
+                if (!tracking) {
+                    if (count1.size() ==  3){
+                        count1.clear();
+                    } else {
+                        count1.add(0);
+                        if (count1.get(0) == 0){
+                            count1.clear();
+                        }
+                        Log.d(TAG, "count1 size: " + count1.size());
+                    }
                 }
 
             }
@@ -358,15 +392,31 @@ public class Main2Activity extends AppCompatActivity
             if (distance <= 10) {
 
                 if (tracking) {
-                    count++;
-                    Log.d(TAG, "count: " + count);
+                    if (count2.size() > 3) {
+                        Log.d(TAG, "count2: " + count2.get(0) + " " + count2.get(1) + " " + count2.get(2));
+                        if (checkContinue(count2)){
 
-                    if (count == 3) {
-                        Log.d(TAG, "stop tracking");
-                        Toast.makeText(Main2Activity.this, "stop tracking", Toast.LENGTH_SHORT).show();
+                            Log.d(TAG, "stop tracking");
+                            Toast.makeText(Main2Activity.this, "stop tracking", Toast.LENGTH_SHORT).show();
 
-//                        rangeAll = rangeAll + range;
-                        stopTracking(loc);
+                            stopTracking(loc);
+                        } else {
+                            count2.clear();
+                            Log.d(TAG, "clear count2");
+
+                        }
+                    } else {
+                        count2.add(1);
+                        Log.d(TAG, "count2 size: " + count2.size());
+                    }
+                }
+            } else {
+                if (tracking) {
+                    if (count2.size() ==  3){
+                        count2.clear();
+                    } else {
+                        count2.add(0);
+                        Log.d(TAG, "count2 size: " + count2.size());
                     }
 
                 }
@@ -403,13 +453,33 @@ public class Main2Activity extends AppCompatActivity
             Log.d(TAG, "distance checked: " + dis + " ");
 
             if (dis < threshold) {
-                return i;
+                int checkedtype = mySQLiteLocHelper.checkType(i+1);
+
+                return checkedtype;
             }
         }
         return 0;
     }
 
+    private boolean checkContinue(List<Integer> list){
+        int count = 0;
+
+        for (int i = 0; i < list.size() ; i++) {
+            if(list.get(i) == 1) {
+                count++;
+            }
+        }
+
+        if (count == list.size()) {
+            return true;
+        }
+
+        return false;
+    }
+
     public void startTracking(Location l) {
+        count1.clear();
+
         tracking = true;
         endLocation = null;
         endDate = null;
@@ -421,7 +491,8 @@ public class Main2Activity extends AppCompatActivity
 
     public void stopTracking(Location l) {
         tracking = false;
-        count = 0;
+        count2.clear();
+
 
         endDate = new Date();
         endLocation = l;
@@ -445,29 +516,9 @@ public class Main2Activity extends AppCompatActivity
         /* Set the alarm to start at 11:30 PM */
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(System.currentTimeMillis());
-        calendar.set(Calendar.HOUR_OF_DAY, 23);
+        calendar.set(Calendar.HOUR_OF_DAY, 21);
         calendar.set(Calendar.MINUTE, 30);
 
         manager.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), interval,pendingIntent);
-    }
-
-    public void setRepeatedAlarmReceiver() {
-        Intent alarmIntent = new Intent(Main2Activity.this, RepeatedAlarmReceiver.class);
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(Main2Activity.this, 0, alarmIntent, 0);
-
-        AlarmManager manager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-        int interval = 1000 * 60 * 60 * 24;
-
-
-        /* Set the alarm to start at 5:10 PM */
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTimeInMillis(System.currentTimeMillis());
-        calendar.set(Calendar.HOUR_OF_DAY, 17);
-        calendar.set(Calendar.MINUTE, 10);
-
-
-        /* Repeat every day*/
-        manager.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), interval, pendingIntent);
-
     }
 }

@@ -1,40 +1,17 @@
 package com.stanley.myapplication;
 
-import android.annotation.TargetApi;
 import android.app.usage.UsageEvents;
-import android.app.usage.UsageStats;
 import android.app.usage.UsageStatsManager;
 import android.content.Context;
-import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.graphics.drawable.Drawable;
-import android.os.Build;
 import android.os.Bundle;
-import android.provider.Settings;
-import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.RecyclerView;
 import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.Button;
-import android.widget.Spinner;
-import android.widget.SpinnerAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.stanley.myapplication.Locations.MySQLiteLocHelper;
-
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
-import java.util.List;
 
 public class AppUsageActivity extends AppCompatActivity {
 
@@ -52,6 +29,7 @@ public class AppUsageActivity extends AppCompatActivity {
         statistics = (TextView) findViewById(R.id.tv_app_usage);
         UsageEvents events = getUsageStatistics();
         updateAppsList(events);
+        finish();
     }
 
     public UsageEvents getUsageStatistics() {
@@ -59,7 +37,7 @@ public class AppUsageActivity extends AppCompatActivity {
         Calendar cal = Calendar.getInstance();
         cal.add(Calendar.YEAR, -1);
 
-        long start = System.currentTimeMillis() - (long)1200000;
+        long start = System.currentTimeMillis() - (long)86400000;
         long end = System.currentTimeMillis();
 
         UsageEvents events = mUsageStatsManager.queryEvents(start, end);
@@ -86,6 +64,8 @@ public class AppUsageActivity extends AppCompatActivity {
 
             mySQLiteLocHelper = new MySQLiteLocHelper(AppUsageActivity.this);
             mySQLiteLocHelper.appInsert(userId, eventOut.getPackageName(), eventOut.getTimeStamp());
+
+
 
         }
         statistics.setText(s);

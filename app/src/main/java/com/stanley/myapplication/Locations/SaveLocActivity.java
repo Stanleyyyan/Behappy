@@ -2,7 +2,6 @@ package com.stanley.myapplication.Locations;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.Dialog;
 import android.content.ContentResolver;
 import android.content.Intent;
 import android.location.LocationManager;
@@ -14,10 +13,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.ImageView;
 import android.widget.ListView;
-import android.widget.ProgressBar;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
@@ -25,9 +21,8 @@ import com.google.android.gms.common.GooglePlayServicesRepairableException;
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.ui.PlacePicker;
 import com.stanley.myapplication.Main2Activity;
+import com.stanley.myapplication.MySQLiteLocHelper;
 import com.stanley.myapplication.R;
-
-import java.util.Date;
 
 public class SaveLocActivity extends AppCompatActivity {
     private static final String TAG = "SaveLocActivity";

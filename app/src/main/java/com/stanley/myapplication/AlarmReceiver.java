@@ -1,15 +1,16 @@
 package com.stanley.myapplication;
 
-
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.androidadvance.androidsurvey.SurveyActivity;
 import com.stanley.myapplication.Locations.LocationDaily;
-import com.stanley.myapplication.Locations.MySQLiteLocHelper;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Date;
 import java.util.List;
 
@@ -61,6 +62,22 @@ public class AlarmReceiver extends BroadcastReceiver {
 
         //put it back in one table
         mySQLiteLocHelper.insertDailyUpload(locationDaily);
+
+        //pop up survey
+
+
+        //save app usage daily
+        Intent i = new Intent();
+        i.setClassName("com.stanley.myapplication", "com.stanley.myapplication.AppUsageActivity");
+        i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        context.startActivity(i);
+
+
+        //save contact
+        Intent i2 = new Intent();
+        i2.setClassName("com.stanley.myapplication", "com.stanley.myapplication.contactrecord.ContactrecordActivity");
+        i2.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        context.startActivity(i2);
 
     }
 }

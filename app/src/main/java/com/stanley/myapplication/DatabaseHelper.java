@@ -66,7 +66,7 @@ public class DatabaseHelper {
 
     }
 
-    public void connectToDB_insertApp(int userId, String name, long time){
+    public void connectToDB_insertLocation(int userId, String name, long time){
         //connectToServer();
         Connection conn;
 

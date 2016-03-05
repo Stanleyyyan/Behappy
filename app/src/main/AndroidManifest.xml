@@ -69,13 +69,13 @@
             android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize"
             android:label="Survey"
             android:windowSoftInputMode="stateHidden" />
+        <activity android:name=".contactrecord.ContactrecordActivity"/>
         <!--<activity-->
         <!--android:name=".Main2Activity"-->
         <!--android:label="@string/title_activity_main2"-->
         <!--android:theme="@style/AppTheme.NoActionBar" >-->
         <!--</activity>-->
         <receiver android:name=".AlarmReceiver"/>
-        <receiver android:name=".RepeatedAlarmReceiver"/>
     </application>
 
 </manifest>
