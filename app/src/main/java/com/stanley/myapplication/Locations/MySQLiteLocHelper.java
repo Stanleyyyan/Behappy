@@ -72,7 +72,7 @@ public class MySQLiteLocHelper extends SQLiteOpenHelper {
      * uplad daily
      ****************************************/
 
-    public void insertDailyUpload(int id, long date, LocationDaily locationDaily, double durationSpec){
+    public void insertDailyUpload(int id, long date, LocationDaily locationDaily){
         //userId Integer, date Integer, " + "distance real, range real, duration real, durationSpec real
 
         SQLiteDatabase db = this.getWritableDatabase();
@@ -82,7 +82,7 @@ public class MySQLiteLocHelper extends SQLiteOpenHelper {
         initialValues.put("distance", locationDaily.getDistance());
         initialValues.put("range", locationDaily.getRange());
         initialValues.put("duration", locationDaily.getDuration());
-        initialValues.put("durationSpec", durationSpec);
+        initialValues.put("durationSpec", locationDaily.getDurationSpec());
         Log.d(TAG, initialValues.toString());
         db.insert("upload", null, initialValues);
 
@@ -90,10 +90,30 @@ public class MySQLiteLocHelper extends SQLiteOpenHelper {
 
     }
 
-    public void getDailyUpload(){
+    public LocationDaily getDailyUpload(){
         SQLiteDatabase db = this.getReadableDatabase();
+        LocationDaily locationDaily = new LocationDaily();
 
+        String request = "select * from upload";
+        Cursor cursor = db.rawQuery(request, new String[]{});
 
+        if (cursor.getCount() > 0) {
+            for (int i = 0; i < cursor.getCount(); i++) {
+                cursor.moveToPosition(i);
+                locationDaily.setUserId(cursor.getInt(0));
+                locationDaily.setDate(cursor.getLong(1));
+                locationDaily.setDistance(cursor.getDouble(2));
+                locationDaily.setRange(cursor.getDouble(3));
+                locationDaily.setDuration(cursor.getDouble(4));
+                locationDaily.setDurationSpec(cursor.getDouble(5));
+                Log.d(TAG, "get upload daily : " + cursor.getDouble(4) + " " + cursor.getDouble(5));
+            }
+        }
+
+        cursor.close();
+        db.close();
+
+        return locationDaily;
 
     }
 
@@ -138,14 +158,21 @@ public class MySQLiteLocHelper extends SQLiteOpenHelper {
 
         List<LocationDaily> list = new ArrayList<LocationDaily>();
 
-
         if (cursor.getCount() > 0) {
             for (int i = 0; i < cursor.getCount(); i++) {
                 cursor.moveToPosition(i);
                 LocationDaily locationDaily = new LocationDaily();
                 locationDaily.setDistance(cursor.getDouble(0));
                 locationDaily.setRange(cursor.getDouble(1));
-                locationDaily.setDuration(cursor.getDouble(2));
+
+                if (cursor.getInt(3) == 0) {
+                    locationDaily.setDuration(cursor.getDouble(2));
+                }
+
+                if (cursor.getInt(3) == 1) {
+                    locationDaily.setDurationSpec(cursor.getDouble(2));
+                }
+
                 locationDaily.setType(cursor.getInt(3));
                 list.add(locationDaily);
                 Log.d(TAG, "get location daily : " + cursor.getDouble(0) + " " + cursor.getDouble(1) +

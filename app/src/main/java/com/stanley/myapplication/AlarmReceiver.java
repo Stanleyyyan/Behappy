@@ -10,6 +10,7 @@ import android.widget.Toast;
 import com.stanley.myapplication.Locations.LocationDaily;
 import com.stanley.myapplication.Locations.MySQLiteLocHelper;
 
+import java.util.Date;
 import java.util.List;
 
 public class AlarmReceiver extends BroadcastReceiver{
@@ -42,6 +43,7 @@ public class AlarmReceiver extends BroadcastReceiver{
         //sum 1 and 2 separately
         int size = list.size();
 
+
         for (int i = 0; i < size; i++) {
             LocationDaily locationDaily = list.get(i);
             if (locationDaily.getType()==0){
@@ -51,17 +53,21 @@ public class AlarmReceiver extends BroadcastReceiver{
             }
 
             if (locationDaily.getType() == 1) {
-                durationAllForSpec = durationAllForSpec + locationDaily.getDuration();
+                durationAllForSpec = durationAllForSpec + locationDaily.getDurationSpec();
             }
         }
 
         Log.d(TAG, "0: " + distanceAll + " " + rangeAll + " " + durationAll);
         Log.d(TAG, "1: " + durationAllForSpec);
 
+        LocationDaily locationDaily = new LocationDaily();
+        locationDaily.setDistance(distanceAll);
+        locationDaily.setRange(rangeAll);
+        locationDaily.setDuration(durationAll);
+        locationDaily.setDurationSpec(durationAllForSpec);
 
         //put it back in one table
-
-
+        mySQLiteLocHelper.insertDailyUpload(userId, new Date().getTime(), locationDaily);
 
     }
 }

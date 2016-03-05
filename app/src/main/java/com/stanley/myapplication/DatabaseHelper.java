@@ -29,7 +29,6 @@ public class DatabaseHelper {
 
 
     public DatabaseHelper() {
-        connectToServer();
 
     }
 
@@ -62,6 +61,7 @@ public class DatabaseHelper {
 
         } catch (Exception e) {
             e.printStackTrace();
+
         }
 
     }
