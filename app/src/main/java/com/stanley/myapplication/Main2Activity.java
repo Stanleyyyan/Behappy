@@ -151,6 +151,7 @@ public class Main2Activity extends AppCompatActivity
 
         setAlarmReceiver1();
         setAlarmReceiver2();
+        setAlarmReceiver3();
     }
 
     @Override
@@ -529,11 +530,11 @@ public class Main2Activity extends AppCompatActivity
 
         AlarmManager manager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
 
-        /* Set the alarm to start at 11:30 PM */
+        /* Set the alarm to start at 10:30 PM */
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(System.currentTimeMillis());
-        calendar.set(Calendar.HOUR_OF_DAY, 16);
-        calendar.set(Calendar.MINUTE, 1);
+        calendar.set(Calendar.HOUR_OF_DAY, 22);
+        calendar.set(Calendar.MINUTE, 30);
 
         manager.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), interval, pendingIntent);
     }
@@ -545,11 +546,27 @@ public class Main2Activity extends AppCompatActivity
 
         AlarmManager manager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
 
-        /* Set the alarm to start at 11:45 PM */
+        /* Set the alarm to start at 10:32 PM */
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(System.currentTimeMillis());
-        calendar.set(Calendar.HOUR_OF_DAY, 16);
-        calendar.set(Calendar.MINUTE, 2);
+        calendar.set(Calendar.HOUR_OF_DAY, 22);
+        calendar.set(Calendar.MINUTE, 32);
+
+        manager.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), interval,pendingIntent);
+    }
+
+    public void setAlarmReceiver3() {
+        Intent alarmIntent = new Intent(Main2Activity.this, AlarmReceiver3.class);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(Main2Activity.this, 0, alarmIntent, 0);
+        int interval = 1000 * 60 * 60 * 24;
+
+        AlarmManager manager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+
+        /* Set the alarm to start at 10:35 PM */
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(System.currentTimeMillis());
+        calendar.set(Calendar.HOUR_OF_DAY, 22);
+        calendar.set(Calendar.MINUTE, 35);
 
         manager.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), interval,pendingIntent);
     }

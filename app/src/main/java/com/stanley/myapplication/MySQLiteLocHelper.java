@@ -51,7 +51,7 @@ public class MySQLiteLocHelper extends SQLiteOpenHelper {
             "userId Integer, contrcdId Integer, contactName text, " +
             "contrcdDateTime text, contrcdType Integer, duration Integer, tag Integer)";
 
-    private final static String CREATE_TABLE_RECORD = "create table record (item Integer primary key autoincrement not null, " +
+    private final static String CREATE_TABLE_RECORD = "create table record (item Integer, " +
         "numrecord Integer, numapp Integer, numcontact Integer, numsurvey Integer, numdaily Integer)";
 
     private DatabaseHelper databaseHelper;
@@ -109,6 +109,9 @@ public class MySQLiteLocHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getWritableDatabase();
 
         ContentValues initialValues = new ContentValues();
+        int count = testForRecor();//
+
+        initialValues.put("item", count);
         initialValues.put("numrecord", record);
         initialValues.put("numapp", app);
         initialValues.put("numcontact", contact);
@@ -118,11 +121,13 @@ public class MySQLiteLocHelper extends SQLiteOpenHelper {
         Log.d(TAG, "daily record : " + initialValues.toString());
         db.insert("record", null, initialValues);
 
-        int count = testForRecor();
         Log.d(TAG, "get test result: " + count);
 
+        Log.d(TAG, "get test result: " + testForRecorapp());
+        Log.d(TAG, "get test result: " + testForRecordaily());
+        Log.d(TAG, "get test result: " + testForRecorcontact());
+
         db.close();
-        Log.d(TAG, "get test result: " + testForRecor());
     }
 
     public int testForRecor() {
@@ -137,30 +142,28 @@ public class MySQLiteLocHelper extends SQLiteOpenHelper {
 
     public int testForRecorapp() {
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor mCount = db.rawQuery("select num from record where item = '1'", null);
+        Cursor mCount = db.rawQuery("select numapp from record where item = '0'", null);
         mCount.moveToFirst();
         int count = mCount.getInt(0);
         mCount.close();
         db.close();
-
 
         return count;
     }
 
     public int testForRecordaily() {
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor mCount = db.rawQuery("select numdaily from record where item = '1'", null);
+        Cursor mCount = db.rawQuery("select numdaily from record where item = '0'", null);
         mCount.moveToFirst();
         int count = mCount.getInt(0);
         mCount.close();
         db.close();
 
-
         return count;
     }
     public int testForRecorcontact() {
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor mCount = db.rawQuery("select numcontact from record where item = '1'", null);
+        Cursor mCount = db.rawQuery("select numcontact from record where item = '0'", null);
         mCount.moveToFirst();
         int count = mCount.getInt(0);
         mCount.close();
@@ -174,18 +177,26 @@ public class MySQLiteLocHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getReadableDatabase();
 
         int count = testForRecor();
+        Log.d(TAG, "count: " + count);
+        count = count - 1;
+        Log.d(TAG, "count: " + count);
         String request = "select * from record where item = '" + count + "'";
         Cursor cursor = db.rawQuery(request, new String[]{});
 
         List<Integer> list = new ArrayList<Integer>();
 
-        Log.d(TAG, "" + cursor.getCount());
+        Log.d(TAG, "cursor.getCount: " + cursor.getCount());
         if (cursor.getCount() > 0) {
             for (int i = 0; i < cursor.getCount(); i++) {
                 cursor.moveToPosition(i);
-                list.add(cursor.getInt(i));
+                list.add(cursor.getInt(0));
+                list.add(cursor.getInt(1));
+                list.add(cursor.getInt(2));
+                list.add(cursor.getInt(3));
+                list.add(cursor.getInt(4));
+                list.add(cursor.getInt(5));
 
-                Log.d(TAG, "num : " + i  + " " + cursor.getInt(i));
+                //Log.d(TAG, "num : " + i  + " " + cursor.getInt(i));
             }
         }
 
