@@ -76,6 +76,7 @@
         <!--android:theme="@style/AppTheme.NoActionBar" >-->
         <!--</activity>-->
         <receiver android:name=".AlarmReceiver"/>
+        <receiver android:name=".AlarmReceiver2"/>
     </application>
 
 </manifest>

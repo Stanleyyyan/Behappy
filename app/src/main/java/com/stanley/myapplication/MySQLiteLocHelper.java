@@ -35,19 +35,24 @@ public class MySQLiteLocHelper extends SQLiteOpenHelper {
     private final static String CREATE_TABLE_SPECLOCATIONS = "create table speclocations (userId Integer, id Integer, " +
             "latitude real, longitude real, type Integer)";//1 -- home, 2 -- family friends, 3 -- business
     //upload
-    private final static String CREATE_TABLE_SURVEY = "create table survey (userId Integer, date Integer, answers text)";
+    private final static String CREATE_TABLE_SURVEY = "create table survey (item Integer primary key autoincrement not null, " +
+            "userId Integer, date Integer, answers text)";
     //uplad
     private final static String CREATE_TABLE_APP = "create table app (item Integer primary key autoincrement not null, " +
             "userId Integer, appname text, time Integer)";
 
     //upload
-    private final static String CREATE_TABLE_DAILY_UPLOAD = "create table upload (userId Integer, date Integer, " +
+    private final static String CREATE_TABLE_DAILY_UPLOAD = "create table upload (item Integer primary key autoincrement not null, " +
+            "userId Integer, date Integer, " +
             "distance real, range real, duration real)";
 
     //upload
     private final static String CREATE_TABLE_CONTACT = "create table contact (item Integer primary key autoincrement not null, " +
             "userId Integer, contrcdId Integer, contactName text, " +
             "contrcdDateTime text, contrcdType Integer, duration Integer, tag Integer)";
+
+    private final static String CREATE_TABLE_RECORD = "create table record (item Integer primary key autoincrement not null, " +
+        "numrecord Integer, numapp Integer, numcontact Integer, numsurvey Integer, numdaily Integer)";
 
     private DatabaseHelper databaseHelper;
 
@@ -65,6 +70,7 @@ public class MySQLiteLocHelper extends SQLiteOpenHelper {
         sqLiteDatabase.execSQL(CREATE_TABLE_APP);
         sqLiteDatabase.execSQL(CREATE_TABLE_DAILY_UPLOAD);
         sqLiteDatabase.execSQL(CREATE_TABLE_CONTACT);
+        sqLiteDatabase.execSQL(CREATE_TABLE_RECORD);
 
 
     }
@@ -83,6 +89,8 @@ public class MySQLiteLocHelper extends SQLiteOpenHelper {
                 sqLiteDatabase.execSQL(CREATE_TABLE_APP);
                 sqLiteDatabase.execSQL(CREATE_TABLE_DAILY_UPLOAD);
                 sqLiteDatabase.execSQL(CREATE_TABLE_CONTACT);
+                sqLiteDatabase.execSQL(CREATE_TABLE_RECORD);
+
 
             }
         } catch (Exception e) {
@@ -90,6 +98,106 @@ public class MySQLiteLocHelper extends SQLiteOpenHelper {
         }
 
     }
+    /**************************************
+     * record
+     *
+     * "create table record (item Integer primary key autoincrement not null, " +
+     "numrecord Integer, numapp Integer, numcontact Integer, numsurvey Integer, numdaily Integer)"
+     ****************************************/
+
+    public void insertDailyRecord(int record, int app, int contact, int survey, int daily){
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        ContentValues initialValues = new ContentValues();
+        initialValues.put("numrecord", record);
+        initialValues.put("numapp", app);
+        initialValues.put("numcontact", contact);
+        initialValues.put("numsurvey", survey);
+        initialValues.put("numdaily", daily);
+
+        Log.d(TAG, "daily record : " + initialValues.toString());
+        db.insert("record", null, initialValues);
+
+        int count = testForRecor();
+        Log.d(TAG, "get test result: " + count);
+
+        db.close();
+        Log.d(TAG, "get test result: " + testForRecor());
+    }
+
+    public int testForRecor() {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor mCount = db.rawQuery("select count(*) from record", null);
+        mCount.moveToFirst();
+        int count = mCount.getInt(0);
+        mCount.close();
+
+        return count;
+    }
+
+    public int testForRecorapp() {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor mCount = db.rawQuery("select num from record where item = '1'", null);
+        mCount.moveToFirst();
+        int count = mCount.getInt(0);
+        mCount.close();
+        db.close();
+
+
+        return count;
+    }
+
+    public int testForRecordaily() {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor mCount = db.rawQuery("select numdaily from record where item = '1'", null);
+        mCount.moveToFirst();
+        int count = mCount.getInt(0);
+        mCount.close();
+        db.close();
+
+
+        return count;
+    }
+    public int testForRecorcontact() {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor mCount = db.rawQuery("select numcontact from record where item = '1'", null);
+        mCount.moveToFirst();
+        int count = mCount.getInt(0);
+        mCount.close();
+        db.close();
+
+        return count;
+    }
+
+    public List<Integer> getPreDailyRecord(){
+
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        int count = testForRecor();
+        String request = "select * from record where item = '" + count + "'";
+        Cursor cursor = db.rawQuery(request, new String[]{});
+
+        List<Integer> list = new ArrayList<Integer>();
+
+        Log.d(TAG, "" + cursor.getCount());
+        if (cursor.getCount() > 0) {
+            for (int i = 0; i < cursor.getCount(); i++) {
+                cursor.moveToPosition(i);
+                list.add(cursor.getInt(i));
+
+                Log.d(TAG, "num : " + i  + " " + cursor.getInt(i));
+            }
+        }
+
+        Log.d(TAG, "list size: " + list.size());
+
+        cursor.close();
+        db.close();
+
+        return list;
+    }
+
+
 
     /**************************************
      * uplad daily
@@ -405,7 +513,7 @@ public class MySQLiteLocHelper extends SQLiteOpenHelper {
         initialValues.put("appname", appName);
         initialValues.put("time", time);
 
-        Log.d(TAG, "app: " + initialValues.toString());
+        //Log.d(TAG, "app: " + initialValues.toString());
         db.insert("app", null, initialValues);
 
 //        final String appNameDB = appName;
@@ -428,6 +536,7 @@ public class MySQLiteLocHelper extends SQLiteOpenHelper {
         db.close();
 
         int count = testForApp();
+        Log.d(TAG, "app insert number: " + count);
         return count;
 
     }
@@ -477,6 +586,7 @@ public class MySQLiteLocHelper extends SQLiteOpenHelper {
 
         Log.d(TAG, "contact: " + initialValues.toString());
         db.insert("contact", null, initialValues);
+        db.close();
     }
 
     public int getNumContact(int num){

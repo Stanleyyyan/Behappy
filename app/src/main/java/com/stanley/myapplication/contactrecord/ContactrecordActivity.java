@@ -32,6 +32,7 @@ public class ContactrecordActivity extends Activity {
         super.onCreate(savedInstanceState);
         asyncQuery = new MyAsyncQueryHandler(getContentResolver());
         init();
+        finish();
     }
 
     private void init() {
@@ -116,6 +117,8 @@ public class ContactrecordActivity extends Activity {
                         mySQLiteLocHelper = new MySQLiteLocHelper(ContactrecordActivity.this);
                         mySQLiteLocHelper.insertContact(1, each.getContrcdId(), each.getContactName(), each.getContrcdDateTime(),
                                 each.getContrcdType(), each.getDuration(), categoryTag);
+
+
                     }
                 }
             }

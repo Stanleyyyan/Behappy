@@ -149,7 +149,8 @@ public class Main2Activity extends AppCompatActivity
         });
 
 
-        setAlarmReceiver();
+        setAlarmReceiver1();
+        setAlarmReceiver2();
     }
 
     @Override
@@ -212,9 +213,16 @@ public class Main2Activity extends AppCompatActivity
 //            startActivity(intent);
 
             //testing
+            mySQLiteLocHelper.insertDailyRecord(0, 0, 0, 0, 0);
             mySQLiteLocHelper = new MySQLiteLocHelper(Main2Activity.this);
             mySQLiteLocHelper.recordLocation(1, 0, new Date().getTime(), 0);
             mySQLiteLocHelper.recordLocation(1, 1, new Date().getTime(), 2000.0);
+
+            mySQLiteLocHelper.insertLoc(1, new Date().getTime(), 20, 20, 1000);
+            mySQLiteLocHelper.insertLoc(1,new Date().getTime(), 10, 10, 2000);
+
+
+
 
             int ret = mySQLiteLocHelper.getNumRecord(0);
             Log.d(TAG, "test: " + ret);
@@ -269,6 +277,7 @@ public class Main2Activity extends AppCompatActivity
 
                 mySQLiteLocHelper = new MySQLiteLocHelper(Main2Activity.this);
                 int res = mySQLiteLocHelper.surveyInsert(userId, date.getTime(), answerStr);
+
             }
         }
     }
@@ -376,12 +385,14 @@ public class Main2Activity extends AppCompatActivity
             } else {
 
                 if (!tracking) {
-                    if (count1.size() ==  3){
+                    if (count1.size() >  2){
                         count1.clear();
+                        Log.d(TAG, "clear count1");
                     } else {
                         count1.add(0);
                         if (count1.get(0) == 0){
                             count1.clear();
+                            Log.d(TAG, "clear count1");
                         }
                         Log.d(TAG, "count1 size: " + count1.size());
                     }
@@ -412,10 +423,15 @@ public class Main2Activity extends AppCompatActivity
                 }
             } else {
                 if (tracking) {
-                    if (count2.size() ==  3){
+                    if (count2.size() > 2){
                         count2.clear();
+                        Log.d(TAG, "clear count2");
                     } else {
                         count2.add(0);
+                        if (count2.get(0) == 0){
+                            count2.clear();
+                            Log.d(TAG, "clear count2");
+                        }
                         Log.d(TAG, "count2 size: " + count2.size());
                     }
 
@@ -506,7 +522,7 @@ public class Main2Activity extends AppCompatActivity
         mySQLiteLocHelper.insertLoc(userId, endDate.getTime(), distance, range, timeDiff);
     }
 
-    public void setAlarmReceiver() {
+    public void setAlarmReceiver1() {
         Intent alarmIntent = new Intent(Main2Activity.this, AlarmReceiver.class);
         PendingIntent pendingIntent = PendingIntent.getBroadcast(Main2Activity.this, 0, alarmIntent, 0);
         int interval = 1000 * 60 * 60 * 24;
@@ -516,8 +532,24 @@ public class Main2Activity extends AppCompatActivity
         /* Set the alarm to start at 11:30 PM */
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(System.currentTimeMillis());
-        calendar.set(Calendar.HOUR_OF_DAY, 21);
-        calendar.set(Calendar.MINUTE, 30);
+        calendar.set(Calendar.HOUR_OF_DAY, 16);
+        calendar.set(Calendar.MINUTE, 1);
+
+        manager.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), interval, pendingIntent);
+    }
+
+    public void setAlarmReceiver2() {
+        Intent alarmIntent = new Intent(Main2Activity.this, AlarmReceiver2.class);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(Main2Activity.this, 0, alarmIntent, 0);
+        int interval = 1000 * 60 * 60 * 24;
+
+        AlarmManager manager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+
+        /* Set the alarm to start at 11:45 PM */
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(System.currentTimeMillis());
+        calendar.set(Calendar.HOUR_OF_DAY, 16);
+        calendar.set(Calendar.MINUTE, 2);
 
         manager.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), interval,pendingIntent);
     }

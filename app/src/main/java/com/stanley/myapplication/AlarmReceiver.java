@@ -30,7 +30,7 @@ public class AlarmReceiver extends BroadcastReceiver {
         rangeAll = 0;
         durationAll = 0;
 
-        Toast.makeText(context, "I'm running", Toast.LENGTH_SHORT).show();
+        Toast.makeText(context, "I'm running 1", Toast.LENGTH_SHORT).show();
 
         mySQLiteLocHelper = new MySQLiteLocHelper(context);
 
@@ -63,21 +63,18 @@ public class AlarmReceiver extends BroadcastReceiver {
         //put it back in one table
         mySQLiteLocHelper.insertDailyUpload(locationDaily);
 
-        //pop up survey
-
-
         //save app usage daily
         Intent i = new Intent();
         i.setClassName("com.stanley.myapplication", "com.stanley.myapplication.AppUsageActivity");
         i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         context.startActivity(i);
 
-
         //save contact
         Intent i2 = new Intent();
         i2.setClassName("com.stanley.myapplication", "com.stanley.myapplication.contactrecord.ContactrecordActivity");
         i2.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         context.startActivity(i2);
-
     }
+
+
 }
