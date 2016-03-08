@@ -51,7 +51,7 @@ public class MySQLiteLocHelper extends SQLiteOpenHelper {
             "userId Integer, contrcdId Integer, contactName text, " +
             "contrcdDateTime text, contrcdType Integer, duration Integer, tag Integer)";
 
-    private final static String CREATE_TABLE_RECORD = "create table record (item Integer, " +
+    private final static String CREATE_TABLE_RECORD = "create table record (item Integer primary key autoincrement not null, " +
         "numrecord Integer, numapp Integer, numcontact Integer, numsurvey Integer, numdaily Integer)";
 
     private DatabaseHelper databaseHelper;
@@ -109,9 +109,7 @@ public class MySQLiteLocHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getWritableDatabase();
 
         ContentValues initialValues = new ContentValues();
-        int count = testForRecor();//
 
-        initialValues.put("item", count);
         initialValues.put("numrecord", record);
         initialValues.put("numapp", app);
         initialValues.put("numcontact", contact);
@@ -121,64 +119,64 @@ public class MySQLiteLocHelper extends SQLiteOpenHelper {
         Log.d(TAG, "daily record : " + initialValues.toString());
         db.insert("record", null, initialValues);
 
+        int count = testForRecor();
         Log.d(TAG, "get test result: " + count);
-
-        Log.d(TAG, "get test result: " + testForRecorapp());
-        Log.d(TAG, "get test result: " + testForRecordaily());
-        Log.d(TAG, "get test result: " + testForRecorcontact());
+//        Log.d(TAG, "get test result: " + testForRecorapp());
+//        Log.d(TAG, "get test result: " + testForRecordaily());
+//        Log.d(TAG, "get test result: " + testForRecorcontact());
 
         db.close();
     }
 
     public int testForRecor() {
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor mCount = db.rawQuery("select count(*) from record", null);
+        Cursor mCount = db.rawQuery("select MAX(item) from record", null);
         mCount.moveToFirst();
         int count = mCount.getInt(0);
         mCount.close();
 
-        return count;
-    }
-
-    public int testForRecorapp() {
-        SQLiteDatabase db = this.getReadableDatabase();
-        Cursor mCount = db.rawQuery("select numapp from record where item = '0'", null);
-        mCount.moveToFirst();
-        int count = mCount.getInt(0);
-        mCount.close();
         db.close();
-
         return count;
     }
 
-    public int testForRecordaily() {
-        SQLiteDatabase db = this.getReadableDatabase();
-        Cursor mCount = db.rawQuery("select numdaily from record where item = '0'", null);
-        mCount.moveToFirst();
-        int count = mCount.getInt(0);
-        mCount.close();
-        db.close();
-
-        return count;
-    }
-    public int testForRecorcontact() {
-        SQLiteDatabase db = this.getReadableDatabase();
-        Cursor mCount = db.rawQuery("select numcontact from record where item = '0'", null);
-        mCount.moveToFirst();
-        int count = mCount.getInt(0);
-        mCount.close();
-        db.close();
-
-        return count;
-    }
+//    public int testForRecorapp() {
+//        SQLiteDatabase db = this.getReadableDatabase();
+//        Cursor mCount = db.rawQuery("select numapp from record where item = '0'", null);
+//        mCount.moveToFirst();
+//        int count = mCount.getInt(0);
+//        mCount.close();
+//        db.close();
+//
+//        return count;
+//    }
+//
+//    public int testForRecordaily() {
+//        SQLiteDatabase db = this.getReadableDatabase();
+//        Cursor mCount = db.rawQuery("select numdaily from record where item = '0'", null);
+//        mCount.moveToFirst();
+//        int count = mCount.getInt(0);
+//        mCount.close();
+//        db.close();
+//
+//        return count;
+//    }
+//    public int testForRecorcontact() {
+//        SQLiteDatabase db = this.getReadableDatabase();
+//        Cursor mCount = db.rawQuery("select numcontact from record where item = '0'", null);
+//        mCount.moveToFirst();
+//        int count = mCount.getInt(0);
+//        mCount.close();
+//        db.close();
+//
+//        return count;
+//    }
 
     public List<Integer> getPreDailyRecord(){
+        int count = testForRecor();
 
         SQLiteDatabase db = this.getReadableDatabase();
 
-        int count = testForRecor();
-        Log.d(TAG, "count: " + count);
-        count = count - 1;
+
         Log.d(TAG, "count: " + count);
         String request = "select * from record where item = '" + count + "'";
         Cursor cursor = db.rawQuery(request, new String[]{});
@@ -229,6 +227,55 @@ public class MySQLiteLocHelper extends SQLiteOpenHelper {
         db.insert("upload", null, initialValues);
 
         db.close();
+
+    }
+
+    public void sendLocation (int num) {
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        Cursor cursor = db.rawQuery("select * from upload where item = '" + num + "'", null);
+
+        int userId = 0;
+        long date = 0;
+        double distance = 0.0;
+        double range = 0.0;
+        double duration = 0.0;
+
+        if (cursor.getCount() > 0) {
+            for (int i = 0; i < cursor.getCount(); i++) {
+                cursor.moveToPosition(i);
+                userId = cursor.getInt(1);
+                date = cursor.getLong(2);
+                distance = cursor.getDouble(3);
+                range = cursor.getDouble(4);
+                duration = cursor.getDouble(5);
+            }
+        }
+
+        cursor.close();
+
+        db.close();
+
+        final int userIdDB = userId;
+        final long dateDB = date;
+        final double distanceDB = distance;
+        final double rangeDB = range;
+        final double durationDB = duration;
+
+        new AsyncTask<Integer, Void, Void>() {
+            @Override
+            protected Void doInBackground(Integer... params) {
+                try {
+                    databaseHelper = new DatabaseHelper();
+                    databaseHelper.connectToDB_sendLocation(userIdDB, dateDB, distanceDB, rangeDB, durationDB);
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                return null;
+            }
+        }.execute(1);
+
 
     }
 
@@ -289,10 +336,11 @@ public class MySQLiteLocHelper extends SQLiteOpenHelper {
         initialValues.put("range", range);
         initialValues.put("duration", duration);
 
-        Log.d(TAG, "locations: "+initialValues.toString());
+        Log.d(TAG, "locations: " + initialValues.toString());
         db.insert("locations", null, initialValues);
-        int count = testForLocation();
         db.close();
+        int count = testForLocation();
+
         return count;
     }
 
@@ -308,9 +356,12 @@ public class MySQLiteLocHelper extends SQLiteOpenHelper {
     }
 
 
+
+
 //
     public List<LocationDaily> getInfoLoc(int userId) {
         SQLiteDatabase db = this.getReadableDatabase();
+
         String request = "select date, distance, range, duration from locations where userId = '" + userId + "'";
         Cursor cursor = db.rawQuery(request, new String[]{});
 
@@ -333,8 +384,17 @@ public class MySQLiteLocHelper extends SQLiteOpenHelper {
 
         cursor.close();
         db.close();
+
+        clearLocations(userId);
+
         return list;
 
+    }
+
+    public void clearLocations(int userId){
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.execSQL("DELETE FROM locations where userId = '" + userId + "'");
+        db.close();
     }
 
     /**************************************
@@ -357,6 +417,51 @@ public class MySQLiteLocHelper extends SQLiteOpenHelper {
         db.insert("recordlocations", null, initialValues);
 
         db.close();
+
+    }
+
+    public void sendRecordLoc(int num) {
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        Cursor cursor = db.rawQuery("select * from recordlocations where item > '" + num + "'", null);
+
+        int userId = 0;
+        List<Integer> typeList = new ArrayList<Integer>();
+        List<Long> timeList = new ArrayList<Long>();
+        List<Double> durationList = new ArrayList<Double>();
+
+        if (cursor.getCount() > 0) {
+            for (int i = 0; i < cursor.getCount(); i++) {
+                cursor.moveToPosition(i);
+                userId = cursor.getInt(1);
+                typeList.add(cursor.getInt(2));
+                timeList.add(cursor.getLong(3));
+                durationList.add(cursor.getDouble(4));
+            }
+        }
+
+        cursor.close();
+        db.close();
+
+        final int userIdDB = userId;
+        final List<Integer> typeListDB = typeList;
+        final List<Long> timeListDB = timeList;
+        final List<Double> durationListDB = durationList;
+
+        new AsyncTask<Integer, Void, Void>() {
+            @Override
+            protected Void doInBackground(Integer... params) {
+                try {
+
+                    databaseHelper = new DatabaseHelper();
+                    databaseHelper.connectToDB_insertRecord(userIdDB, typeListDB, timeListDB, durationListDB);
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                return null;
+            }
+        }.execute(1);
 
     }
 
@@ -395,9 +500,8 @@ public class MySQLiteLocHelper extends SQLiteOpenHelper {
         Log.d(TAG, "specialocations: " + initialValues.toString());
         db.insert("speclocations", null, initialValues);
 
-        int count = testForSpecialLoc();
         db.close();
-        return count;
+        return id++;
     }
 
     public int testForSpecialLoc() {
@@ -512,6 +616,50 @@ public class MySQLiteLocHelper extends SQLiteOpenHelper {
     }
 
 
+    //int id, long date, final String answers
+    public void sendSurvey(int num){
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        Cursor cursor = db.rawQuery("select * from survey where item = '" + num + "'", null);
+
+        int userId = 0;
+        long date = 0;
+        String answers = "";
+
+        if (cursor.getCount() > 0) {
+            for (int i = 0; i < cursor.getCount(); i++) {
+                cursor.moveToPosition(i);
+                userId = cursor.getInt(1);
+                date = cursor.getLong(2);
+                answers = cursor.getString(3);
+            }
+        }
+
+        cursor.close();
+
+        db.close();
+
+        final int userIdDB = userId;
+        final long dateDB = date;
+        final String answersDB = answers;
+
+        new AsyncTask<Integer, Void, Void>() {
+            @Override
+            protected Void doInBackground(Integer... params) {
+                try {
+                    databaseHelper = new DatabaseHelper();
+                    databaseHelper.connectToDB_sendSurvey(userIdDB, dateDB, answersDB);
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                return null;
+            }
+        }.execute(1);
+
+    }
+
+
 
     /**************************************
      * app
@@ -526,24 +674,6 @@ public class MySQLiteLocHelper extends SQLiteOpenHelper {
 
         //Log.d(TAG, "app: " + initialValues.toString());
         db.insert("app", null, initialValues);
-
-//        final String appNameDB = appName;
-//        final long timeDB = time;
-//        final int userId = id;
-//        new AsyncTask<Integer, Void, Void>() {
-//            @Override
-//            protected Void doInBackground(Integer... params) {
-//                try {
-//
-//                    databaseHelper = new DatabaseHelper();
-//                    databaseHelper.connectToDB_insertApp(userId, appNameDB, timeDB);
-//
-//                } catch (Exception e) {
-//                    e.printStackTrace();
-//                }
-//                return null;
-//            }
-//        }.execute(1);
         db.close();
 
         int count = testForApp();
@@ -576,6 +706,49 @@ public class MySQLiteLocHelper extends SQLiteOpenHelper {
         return count;
     }
 
+    public void sendApp(int num) {
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        Log.d(TAG, "send app: " + num);
+        Cursor cursor = db.rawQuery("select * from app where item > '" + num + "'", null);
+
+        int userId = 0;
+        List<String> appnameList = new ArrayList<String>();
+        List<Long> timeList = new ArrayList<Long>();
+
+        if (cursor.getCount() > 0) {
+            for (int i = 0; i < cursor.getCount(); i++) {
+                cursor.moveToPosition(i);
+                userId = cursor.getInt(1);
+                appnameList.add(cursor.getString(2));
+                timeList.add(cursor.getLong(3));
+            }
+        }
+
+        cursor.close();
+        db.close();
+
+        final int userIdDB = userId;
+        final List<String> appnameListDB = appnameList;
+        final List<Long> timeListDB = timeList;
+
+        new AsyncTask<Integer, Void, Void>() {
+            @Override
+            protected Void doInBackground(Integer... params) {
+                try {
+
+                    databaseHelper = new DatabaseHelper();
+                    databaseHelper.connectToDB_insertApp(userIdDB, appnameListDB, timeListDB);
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                return null;
+            }
+        }.execute(1);
+
+    }
+
 
     /**************************************
      * contact
@@ -600,6 +773,61 @@ public class MySQLiteLocHelper extends SQLiteOpenHelper {
         db.close();
     }
 
+    public void sendContact(int num) {
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        Cursor cursor = db.rawQuery("select * from contact where item > '" + num + "'", null);
+
+        int userId = 0;
+        List<Integer> contrcdId = new ArrayList<Integer>();
+        List<String> contactName = new ArrayList<String>();
+        List<String> contrcdDateTime = new ArrayList<String>();
+        List<Integer> contrcdType = new ArrayList<Integer>();
+        List<Long> duration = new ArrayList<Long>();
+        List<Integer> tag = new ArrayList<Integer>();
+
+
+        if (cursor.getCount() > 0) {
+            for (int i = 0; i < cursor.getCount(); i++) {
+                cursor.moveToPosition(i);
+                userId = cursor.getInt(1);
+                contrcdId.add(cursor.getInt(2));
+                contactName.add(cursor.getString(3));
+                contrcdDateTime.add(cursor.getString(4));
+                contrcdType.add(cursor.getInt(5));
+                duration.add(cursor.getLong(6));
+                tag.add(cursor.getInt(7));
+            }
+        }
+
+        cursor.close();
+        db.close();
+
+        final int userIdDB = userId;
+        final List<Integer> contrcdIdDB = contrcdId;
+        final List<String> contactNameDB = contactName;
+        final List<String> contrcdDateTimeDB = contrcdDateTime;
+        final List<Integer> contrcdTypeDB =contrcdType;
+        final List<Long> durationDB = duration;
+        final List<Integer> tagDB = tag;
+
+        new AsyncTask<Integer, Void, Void>() {
+            @Override
+            protected Void doInBackground(Integer... params) {
+                try {
+
+                    databaseHelper = new DatabaseHelper();
+                    databaseHelper.connectToDB_insertContact(userIdDB, contrcdIdDB, contactNameDB,
+                            contrcdDateTimeDB,contrcdTypeDB,durationDB,tagDB);
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                return null;
+            }
+        }.execute(1);
+    }
+
     public int getNumContact(int num){
         SQLiteDatabase db = this.getReadableDatabase();
 
@@ -622,6 +850,7 @@ public class MySQLiteLocHelper extends SQLiteOpenHelper {
 //        db.execSQL("D");
 
         context.deleteDatabase(DATABASE_NAME);
+
     }
 
 }

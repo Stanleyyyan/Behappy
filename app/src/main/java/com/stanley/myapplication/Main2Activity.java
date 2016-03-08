@@ -115,7 +115,7 @@ public class Main2Activity extends AppCompatActivity
             LocationListener mlocListener = new MyLocationListener();
             Criteria criteria = new Criteria();
             criteria.setAccuracy(Criteria.ACCURACY_FINE);
-            mlocManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 10000, 10f, mlocListener);
+            mlocManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 5000, 5f, mlocListener);
             startLoc = mlocManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
             currentLoc = startLoc;
 
@@ -151,7 +151,7 @@ public class Main2Activity extends AppCompatActivity
 
         setAlarmReceiver1();
         setAlarmReceiver2();
-        setAlarmReceiver3();
+        //setAlarmReceiver3();
     }
 
     @Override
@@ -205,22 +205,53 @@ public class Main2Activity extends AppCompatActivity
             Intent intent = new Intent(Main2Activity.this, ContactActivity.class);
             startActivity(intent);
 
-        } else if (id == R.id.nav_app_use) {
-            Intent intent = new Intent(Main2Activity.this, AppUsageActivity.class);
-            startActivity(intent);
+        } else if (id == R.id.upload1) {
+//            Intent intent = new Intent(Main2Activity.this, AppUsageActivity.class);
+//            startActivity(intent);
 
-        } else if (id == R.id.nav_map) {
+            Upload upload = new Upload(1, Main2Activity.this);
+            upload.doUpload();
+
+
+        } else if (id == R.id.upload2) {
+//            Intent intent = new Intent(Main2Activity.this, AppUsageActivity.class);
+//            startActivity(intent);
+            Upload upload = new Upload(5, Main2Activity.this);
+            upload.doUpload();
+
+
+        }else if (id == R.id.upload3) {
+//            Intent intent = new Intent(Main2Activity.this, AppUsageActivity.class);
+//            startActivity(intent);
+
+            Upload upload = new Upload(6, Main2Activity.this);
+            upload.doUpload();
+
+
+        }
+
+        else if (id == R.id.nav_map) {
 //            Intent intent = new Intent(Main2Activity.this, LocationActivity.class);
 //            startActivity(intent);
 
             //testing
             mySQLiteLocHelper.insertDailyRecord(0, 0, 0, 0, 0);
             mySQLiteLocHelper = new MySQLiteLocHelper(Main2Activity.this);
-            mySQLiteLocHelper.recordLocation(1, 0, new Date().getTime(), 0);
-            mySQLiteLocHelper.recordLocation(1, 1, new Date().getTime(), 2000.0);
+
+            mySQLiteLocHelper.recordLocation(1, 3, new Date().getTime(), 21600000);
+            //mySQLiteLocHelper.recordLocation(1, 1, , 21600000);
+
 
             mySQLiteLocHelper.insertLoc(1, new Date().getTime(), 20, 20, 1000);
+            mySQLiteLocHelper.insertLoc(1,new Date().getTime(), 200, 10, 20000);
+            mySQLiteLocHelper.insertLoc(1,new Date().getTime(), 2340, 10, 200000);
+            mySQLiteLocHelper.insertLoc(1,new Date().getTime(), 1, 12, 2000);
+            mySQLiteLocHelper.insertLoc(1,new Date().getTime(), 109, 10, 20398);
+            mySQLiteLocHelper.insertLoc(1,new Date().getTime(), 1028, 13, 248000);
+            mySQLiteLocHelper.insertLoc(1,new Date().getTime(), 2, 1, 1000);
+            mySQLiteLocHelper.insertLoc(1,new Date().getTime(), 1243, 1, 2000);
             mySQLiteLocHelper.insertLoc(1,new Date().getTime(), 10, 10, 2000);
+
 
 
 
@@ -356,7 +387,7 @@ public class Main2Activity extends AppCompatActivity
                 Toast.makeText(Main2Activity.this, "distance: " + distance, Toast.LENGTH_SHORT).show();
             }
 
-            if (distance > 15) {
+            if (distance >= 10) {
 
 
                 if (!tracking) {
@@ -398,10 +429,9 @@ public class Main2Activity extends AppCompatActivity
                         Log.d(TAG, "count1 size: " + count1.size());
                     }
                 }
-
             }
 
-            if (distance <= 10) {
+            if (distance < 10) {
 
                 if (tracking) {
                     if (count2.size() > 3) {
@@ -487,7 +517,7 @@ public class Main2Activity extends AppCompatActivity
             }
         }
 
-        if (count == list.size()) {
+        if (count >= (list.size()-1)) {
             return true;
         }
 
@@ -533,8 +563,8 @@ public class Main2Activity extends AppCompatActivity
         /* Set the alarm to start at 10:30 PM */
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(System.currentTimeMillis());
-        calendar.set(Calendar.HOUR_OF_DAY, 22);
-        calendar.set(Calendar.MINUTE, 30);
+        calendar.set(Calendar.HOUR_OF_DAY, 23);
+        calendar.set(Calendar.MINUTE, 8);
 
         manager.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), interval, pendingIntent);
     }
@@ -549,25 +579,25 @@ public class Main2Activity extends AppCompatActivity
         /* Set the alarm to start at 10:32 PM */
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(System.currentTimeMillis());
-        calendar.set(Calendar.HOUR_OF_DAY, 22);
-        calendar.set(Calendar.MINUTE, 32);
+        calendar.set(Calendar.HOUR_OF_DAY, 23);
+        calendar.set(Calendar.MINUTE, 14);
 
         manager.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), interval,pendingIntent);
     }
 
-    public void setAlarmReceiver3() {
-        Intent alarmIntent = new Intent(Main2Activity.this, AlarmReceiver3.class);
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(Main2Activity.this, 0, alarmIntent, 0);
-        int interval = 1000 * 60 * 60 * 24;
-
-        AlarmManager manager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-
-        /* Set the alarm to start at 10:35 PM */
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTimeInMillis(System.currentTimeMillis());
-        calendar.set(Calendar.HOUR_OF_DAY, 22);
-        calendar.set(Calendar.MINUTE, 35);
-
-        manager.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), interval,pendingIntent);
-    }
+//    public void setAlarmReceiver3() {
+//        Intent alarmIntent = new Intent(Main2Activity.this, AlarmReceiver3.class);
+//        PendingIntent pendingIntent = PendingIntent.getBroadcast(Main2Activity.this, 0, alarmIntent, 0);
+//        int interval = 1000 * 60 * 60 * 24;
+//
+//        AlarmManager manager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+//
+//        /* Set the alarm to start at 10:35 PM */
+//        Calendar calendar = Calendar.getInstance();
+//        calendar.setTimeInMillis(System.currentTimeMillis());
+//        calendar.set(Calendar.HOUR_OF_DAY, 12);
+//        calendar.set(Calendar.MINUTE, 36);
+//
+//        manager.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), interval,pendingIntent);
+//    }
 }

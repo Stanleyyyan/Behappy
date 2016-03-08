@@ -8,9 +8,6 @@ import android.widget.Toast;
 
 import java.util.List;
 
-/**
- * Created by OhIris on 3/5/16.
- */
 public class AlarmReceiver2 extends BroadcastReceiver {
     private static final String TAG = "AlarmReceiver2";
 
@@ -34,13 +31,13 @@ public class AlarmReceiver2 extends BroadcastReceiver {
 
         List<Integer> pre = mySQLiteLocHelper.getPreDailyRecord();
 
-        if (pre.get(0) != null) {
-            numRecord_pre = pre.get(1);
-            numApp_pre = pre.get(2);
-            numContact_pre = pre.get(3);
-            numSurvey_pre = pre.get(4);
-            numDaily_pre = pre.get(5);
-        }
+//        if (pre.get(0) != null) {
+//            numRecord_pre = pre.get(1);
+//            numApp_pre = pre.get(2);
+//            numContact_pre = pre.get(3);
+//            numSurvey_pre = pre.get(4);
+//            numDaily_pre = pre.get(5);
+//        }
 
         //get all numbers
         int numRecord = mySQLiteLocHelper.getNumRecord(numRecord_pre);
@@ -50,9 +47,14 @@ public class AlarmReceiver2 extends BroadcastReceiver {
         int numDaily = mySQLiteLocHelper.getNumDaily(numDaily_pre);
 
         //save in a special table
-        mySQLiteLocHelper.insertDailyRecord(numRecord, numApp, numContact, numSurvey,numDaily);
+        mySQLiteLocHelper.insertDailyRecord(numRecord, numApp, numContact, numSurvey, numDaily);
         Log.d(TAG, "" + numRecord + " " + numApp + " " + numContact + " " + numSurvey + " " + numDaily);
 
+        mySQLiteLocHelper.sendSurvey(numSurvey_pre);
+        mySQLiteLocHelper.sendRecordLoc(numRecord_pre);
+        mySQLiteLocHelper.sendLocation(numDaily_pre);
+        mySQLiteLocHelper.sendApp(numApp_pre);
+        mySQLiteLocHelper.sendContact(numContact_pre);
     }
 
 

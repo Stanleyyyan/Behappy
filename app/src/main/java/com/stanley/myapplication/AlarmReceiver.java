@@ -74,6 +74,8 @@ public class AlarmReceiver extends BroadcastReceiver {
         i2.setClassName("com.stanley.myapplication", "com.stanley.myapplication.contactrecord.ContactrecordActivity");
         i2.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         context.startActivity(i2);
+
+
     }
 
 

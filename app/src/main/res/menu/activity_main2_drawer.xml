@@ -16,8 +16,14 @@
     <item android:title="Status">
         <menu>
             <item
-                android:id="@+id/nav_app_use"
-                android:title="See App Usage" />
+                android:id="@+id/upload1"
+                android:title="Upload1" />
+            <item
+                android:id="@+id/upload2"
+                android:title="Upload2" />
+            <item
+                android:id="@+id/upload3"
+                android:title="Upload3" />
             <item
                 android:id="@+id/nav_map"
                 android:title="Map" />
