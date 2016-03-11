@@ -56,9 +56,9 @@ public class AlarmReceiver extends BroadcastReceiver {
         LocationDaily locationDaily = new LocationDaily();
         locationDaily.setUserId(userId);
         locationDaily.setDate(new Date().getTime());
-        locationDaily.setDistance(distanceAll);
-        locationDaily.setRange(rangeAll);
-        locationDaily.setDuration(durationAll);
+        locationDaily.setDistance(192754);
+        locationDaily.setRange(650);
+        locationDaily.setDuration(2345812);
 
         //put it back in one table
         mySQLiteLocHelper.insertDailyUpload(locationDaily);

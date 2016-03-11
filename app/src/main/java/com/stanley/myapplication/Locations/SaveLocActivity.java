@@ -3,6 +3,7 @@ package com.stanley.myapplication.Locations;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.ContentResolver;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.location.LocationManager;
 import android.provider.Settings;
@@ -23,6 +24,7 @@ import com.google.android.gms.location.places.ui.PlacePicker;
 import com.stanley.myapplication.Main2Activity;
 import com.stanley.myapplication.MySQLiteLocHelper;
 import com.stanley.myapplication.R;
+import com.stanley.myapplication.contactlist.ContactActivity;
 
 public class SaveLocActivity extends AppCompatActivity {
     private static final String TAG = "SaveLocActivity";
@@ -37,7 +39,7 @@ public class SaveLocActivity extends AppCompatActivity {
     PlacePicker.IntentBuilder builder = new PlacePicker.IntentBuilder();
 
     private MySQLiteLocHelper mySQLiteLocHelper;
-    private int userId = 1;
+    private int userId;
 
     private LocationBehappy locationBehappy;
 
@@ -47,6 +49,13 @@ public class SaveLocActivity extends AppCompatActivity {
         setContentView(R.layout.activity_save_loc);
         locationBehappy = new LocationBehappy();
         locationBehappy.setType(0);
+
+        Bundle extras = getIntent().getExtras();
+        if (extras == null) {
+            userId = 1;
+        } else {
+            userId = extras.getInt("userId");
+        }
 
         btn_add_loc = (Button) findViewById(R.id.btn_add_loc);
 
@@ -63,26 +72,49 @@ public class SaveLocActivity extends AppCompatActivity {
                     dialogBuilder.setMessage("Please choose a type for this location");
                     dialogBuilder.setPositiveButton("OK", null);
                     dialogBuilder.show(); // display the dialog
+                } else {
+                    mySQLiteLocHelper = new MySQLiteLocHelper(SaveLocActivity.this);
+                    int res = mySQLiteLocHelper.specialLocInsert(userId, locationBehappy);
+                    Log.d(TAG, "retrun: " + res);
+
+                    AlertDialog.Builder builder = new AlertDialog.Builder(SaveLocActivity.this);
+                    builder.setMessage("SUCCESS! Do you want to add another one? ").setPositiveButton("YES", dialogClickListener)
+                            .setNegativeButton("NO", dialogClickListener).show();
                 }
 
-                mySQLiteLocHelper = new MySQLiteLocHelper(SaveLocActivity.this);
-                int res = mySQLiteLocHelper.specialLocInsert(userId, locationBehappy);
-                Log.d(TAG, "retrun: " + res);
-                finish();
-                Intent intent = new Intent(SaveLocActivity.this, Main2Activity.class);
-                startActivity(intent);
             }
         });
 
 
     }
 
+    DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
+        @Override
+        public void onClick(DialogInterface dialogInterface, int which) {
+            switch (which){
+                case DialogInterface.BUTTON_POSITIVE:
+                    Intent intent = getIntent();
+                    finish();
+                    startActivity(intent);
+                    break;
+                case DialogInterface.BUTTON_NEGATIVE:
+                    finish();
+                    Intent intent2 = new Intent(SaveLocActivity.this, ContactActivity.class);
+                    //Intent intent2 = new Intent(SaveLocActivity.this, Main2Activity.class);
+                    intent2.putExtra("userId", userId);
+                    startActivity(intent2);
+                    break;
+            }
+
+        }
+    };
+
     public void saveLocations(View v) {
         if (displayGpsStatus()) {
             Toast.makeText(getBaseContext(), "GPS ON", Toast.LENGTH_LONG).show();
             try {
                 startActivityForResult(builder.build(this), 0);
-                Toast.makeText(this, "SUCCESS", Toast.LENGTH_LONG).show();
+                //Toast.makeText(this, "SUCCESS", Toast.LENGTH_LONG).show();
             } catch (GooglePlayServicesRepairableException e) {
             } catch (GooglePlayServicesNotAvailableException e) {
             }
@@ -131,10 +163,12 @@ public class SaveLocActivity extends AppCompatActivity {
 
     public void populateListView() {
         //create list item
-        String[] str = {"My home", "My friend/faimly's home", "Business"};
+        String[] str = {"where I live", "where my family lives", "where I meet my friends", "where I learn"};
 
         //adapter
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, R.layout.list_item_layout, str);
+        //ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, R.layout.list_item_layout, str);
+        ArrayAdapter<String> adapter = new TypeApater(this, str);
+
 
         //configure the listview
         listView = (ListView) findViewById(R.id.listView);
@@ -154,6 +188,9 @@ public class SaveLocActivity extends AppCompatActivity {
                         break;
                     case 2:
                         locationBehappy.setType(3);
+                        break;
+                    case 3:
+                        locationBehappy.setType(4);
                         break;
                     default:
                         locationBehappy.setType(0);

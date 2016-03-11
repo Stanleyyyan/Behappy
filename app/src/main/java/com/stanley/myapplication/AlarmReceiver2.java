@@ -29,7 +29,7 @@ public class AlarmReceiver2 extends BroadcastReceiver {
         int numSurvey_pre = 0;
         int numDaily_pre = 0;
 
-        List<Integer> pre = mySQLiteLocHelper.getPreDailyRecord();
+        //List<Integer> pre = mySQLiteLocHelper.getPreDailyRecord();
 
 //        if (pre.get(0) != null) {
 //            numRecord_pre = pre.get(1);
@@ -55,6 +55,11 @@ public class AlarmReceiver2 extends BroadcastReceiver {
         mySQLiteLocHelper.sendLocation(numDaily_pre);
         mySQLiteLocHelper.sendApp(numApp_pre);
         mySQLiteLocHelper.sendContact(numContact_pre);
+
+        mySQLiteLocHelper.clearLocations(userId);
+        mySQLiteLocHelper.clearapp(userId);
+        mySQLiteLocHelper.clearrecordLocations(userId);
+        mySQLiteLocHelper.clearsurvey(userId);
     }
 
 

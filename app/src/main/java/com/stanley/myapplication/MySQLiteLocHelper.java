@@ -420,6 +420,12 @@ public class MySQLiteLocHelper extends SQLiteOpenHelper {
 
     }
 
+    public void clearrecordLocations(int userId){
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.execSQL("DELETE FROM recorlocations where userId = '" + userId + "'");
+        db.close();
+    }
+
     public void sendRecordLoc(int num) {
         SQLiteDatabase db = this.getReadableDatabase();
 
@@ -503,6 +509,8 @@ public class MySQLiteLocHelper extends SQLiteOpenHelper {
         db.close();
         return id++;
     }
+
+
 
     public int testForSpecialLoc() {
         SQLiteDatabase db = this.getReadableDatabase();
@@ -591,6 +599,12 @@ public class MySQLiteLocHelper extends SQLiteOpenHelper {
 
     }
 
+    public void clearsurvey(int userId){
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.execSQL("DELETE FROM survey where userId = '" + userId + "'");
+        db.close();
+    }
+
     public int testForSurvey() {
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor mCount = db.rawQuery("select count(*) from survey", null);
@@ -639,7 +653,7 @@ public class MySQLiteLocHelper extends SQLiteOpenHelper {
 
         db.close();
 
-        final int userIdDB = userId;
+        final int userIdDB = 1;
         final long dateDB = date;
         final String answersDB = answers;
 
@@ -680,6 +694,12 @@ public class MySQLiteLocHelper extends SQLiteOpenHelper {
         Log.d(TAG, "app insert number: " + count);
         return count;
 
+    }
+
+    public void clearapp(int userId){
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.execSQL("DELETE FROM app where userId = '" + userId + "'");
+        db.close();
     }
 
     public int testForApp() {

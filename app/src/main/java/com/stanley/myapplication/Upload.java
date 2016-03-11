@@ -45,16 +45,16 @@ public class Upload {
 
         switch (this.type){
             case 1:
-                mySQLiteLocHelper.sendApp(numApp_pre);
+                mySQLiteLocHelper.sendRecordLoc(numRecord_pre);
 
                 break;
 
             case 2:
                 mySQLiteLocHelper.sendLocation(numDaily_pre);
-                mySQLiteLocHelper.sendRecordLoc(numRecord_pre);
                 break;
 
             case 3:
+                mySQLiteLocHelper.sendApp(numApp_pre);
                 mySQLiteLocHelper.sendSurvey(numSurvey_pre);
                 mySQLiteLocHelper.sendContact(numContact_pre);
                 break;

@@ -19,17 +19,18 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.Toast;
 
 import com.androidadvance.androidsurvey.SurveyActivity;
 import com.google.android.gms.maps.model.LatLng;
 import com.stanley.myapplication.Locations.SaveLocActivity;
+import com.stanley.myapplication.StartActivities.LoginActivity;
 import com.stanley.myapplication.contactlist.ContactActivity;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -38,11 +39,13 @@ import java.util.List;
 public class Main2Activity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
     private static final String TAG = "Main2Activity";
+    private SimpleDateFormat sfd = new SimpleDateFormat("MM-dd hh:mm");
 
     private static final int SURVEY_REQUEST = 1337;
     private Button btn_lonely;
 
-    private int userId = 1;
+    private int userId;
+    private boolean hint;
 
     private LocationManager mlocManager;
     private Location currentLoc;
@@ -84,6 +87,21 @@ public class Main2Activity extends AppCompatActivity
         setContentView(R.layout.activity_main2);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        Bundle extras = getIntent().getExtras();
+        if (extras == null) {
+            hint = true;
+            userId = 1;
+        } else {
+            hint = extras.getBoolean("hint");
+            userId = extras.getInt("userId");
+        }
+
+        //start the start Activities
+        if (hint) {
+            Intent intent = new Intent(Main2Activity.this, LoginActivity.class);
+            startActivity(intent);
+        }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -142,12 +160,12 @@ public class Main2Activity extends AppCompatActivity
                     mySQLiteLocHelper.recordLocation(userId, type, new Date().getTime(), 0.0);
                 }
 
+                Toast.makeText(Main2Activity.this, "Thank you!", Toast.LENGTH_SHORT);
                 //start app usage
 //                Intent intent = new Intent(Main2Activity.this, AppUsageActivity.class);
 //                startActivity(intent);
             }
         });
-
 
         setAlarmReceiver1();
         setAlarmReceiver2();
@@ -204,65 +222,66 @@ public class Main2Activity extends AppCompatActivity
         } else if (id == R.id.nav_contact) {
             Intent intent = new Intent(Main2Activity.this, ContactActivity.class);
             startActivity(intent);
-
-        } else if (id == R.id.upload1) {
-//            Intent intent = new Intent(Main2Activity.this, AppUsageActivity.class);
-//            startActivity(intent);
-
-            Upload upload = new Upload(1, Main2Activity.this);
-            upload.doUpload();
-
-
-        } else if (id == R.id.upload2) {
-//            Intent intent = new Intent(Main2Activity.this, AppUsageActivity.class);
-//            startActivity(intent);
-            Upload upload = new Upload(5, Main2Activity.this);
-            upload.doUpload();
-
-
-        }else if (id == R.id.upload3) {
-//            Intent intent = new Intent(Main2Activity.this, AppUsageActivity.class);
-//            startActivity(intent);
-
-            Upload upload = new Upload(6, Main2Activity.this);
-            upload.doUpload();
-
-
         }
 
-        else if (id == R.id.nav_map) {
-//            Intent intent = new Intent(Main2Activity.this, LocationActivity.class);
-//            startActivity(intent);
-
-            //testing
-            mySQLiteLocHelper.insertDailyRecord(0, 0, 0, 0, 0);
-            mySQLiteLocHelper = new MySQLiteLocHelper(Main2Activity.this);
-
-            mySQLiteLocHelper.recordLocation(1, 3, new Date().getTime(), 21600000);
-            //mySQLiteLocHelper.recordLocation(1, 1, , 21600000);
-
-
-            mySQLiteLocHelper.insertLoc(1, new Date().getTime(), 20, 20, 1000);
-            mySQLiteLocHelper.insertLoc(1,new Date().getTime(), 200, 10, 20000);
-            mySQLiteLocHelper.insertLoc(1,new Date().getTime(), 2340, 10, 200000);
-            mySQLiteLocHelper.insertLoc(1,new Date().getTime(), 1, 12, 2000);
-            mySQLiteLocHelper.insertLoc(1,new Date().getTime(), 109, 10, 20398);
-            mySQLiteLocHelper.insertLoc(1,new Date().getTime(), 1028, 13, 248000);
-            mySQLiteLocHelper.insertLoc(1,new Date().getTime(), 2, 1, 1000);
-            mySQLiteLocHelper.insertLoc(1,new Date().getTime(), 1243, 1, 2000);
-            mySQLiteLocHelper.insertLoc(1,new Date().getTime(), 10, 10, 2000);
-
-
-
-
-
-            int ret = mySQLiteLocHelper.getNumRecord(0);
-            Log.d(TAG, "test: " + ret);
-
-        } else if (id == R.id.nav_delete) {
-            mySQLiteLocHelper = new MySQLiteLocHelper(Main2Activity.this);
-            mySQLiteLocHelper.deleteAll(Main2Activity.this);
-        }
+//        } else if (id == R.id.upload1) {
+////            Intent intent = new Intent(Main2Activity.this, AppUsageActivity.class);
+////            startActivity(intent);
+//
+//            Upload upload = new Upload(1, Main2Activity.this);
+//            upload.doUpload();
+//
+//
+//        } else if (id == R.id.upload2) {
+////            Intent intent = new Intent(Main2Activity.this, AppUsageActivity.class);
+////            startActivity(intent);
+//            Upload upload = new Upload(2, Main2Activity.this);
+//            upload.doUpload();
+//
+//
+//        }else if (id == R.id.upload3) {
+////            Intent intent = new Intent(Main2Activity.this, AppUsageActivity.class);
+////            startActivity(intent);
+//
+//            Upload upload = new Upload(3, Main2Activity.this);
+//            upload.doUpload();
+//
+//
+//        }
+//
+//        else if (id == R.id.nav_map) {
+////            Intent intent = new Intent(Main2Activity.this, LocationActivity.class);
+////            startActivity(intent);
+//
+//            //testing
+////            mySQLiteLocHelper.insertDailyRecord(0, 0, 0, 0, 0);
+////            mySQLiteLocHelper = new MySQLiteLocHelper(Main2Activity.this);
+////
+//            mySQLiteLocHelper.recordLocation(1, 3, new Date().getTime(), 21600000);
+//           // mySQLiteLocHelper.recordLocation(1, 1, , 21600000);
+////
+////
+////            mySQLiteLocHelper.insertLoc(1, new Date().getTime(), 20, 20, 1000);
+////            mySQLiteLocHelper.insertLoc(1,new Date().getTime(), 200, 10, 20000);
+////            mySQLiteLocHelper.insertLoc(1,new Date().getTime(), 2340, 10, 200000);
+////            mySQLiteLocHelper.insertLoc(1,new Date().getTime(), 1, 12, 2000);
+////            mySQLiteLocHelper.insertLoc(1,new Date().getTime(), 109, 10, 20398);
+////            mySQLiteLocHelper.insertLoc(1,new Date().getTime(), 1028, 13, 248000);
+////            mySQLiteLocHelper.insertLoc(1,new Date().getTime(), 2, 1, 1000);
+////            mySQLiteLocHelper.insertLoc(1,new Date().getTime(), 1243, 1, 2000);
+////            mySQLiteLocHelper.insertLoc(1,new Date().getTime(), 10, 10, 2000);
+//
+//            String str = sfd.format(new Date());
+//            mySQLiteLocHelper.insertLoc(1, str, 20, 20, 1000);
+//
+//
+//            int ret = mySQLiteLocHelper.getNumRecord(0);
+//            Log.d(TAG, "test: " + ret);
+//
+//        } else if (id == R.id.nav_delete) {
+//            mySQLiteLocHelper = new MySQLiteLocHelper(Main2Activity.this);
+//            mySQLiteLocHelper.deleteAll(Main2Activity.this);
+//        }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
@@ -384,7 +403,7 @@ public class Main2Activity extends AppCompatActivity
                 distance = (long) preLoc.distanceTo(currentLoc);
                 Log.d(TAG, "distance: " + distance);
 
-                Toast.makeText(Main2Activity.this, "distance: " + distance, Toast.LENGTH_SHORT).show();
+                //Toast.makeText(Main2Activity.this, "distance: " + distance, Toast.LENGTH_SHORT).show();
             }
 
             if (distance >= 10) {
@@ -396,7 +415,7 @@ public class Main2Activity extends AppCompatActivity
 
                         if (checkContinue(count1)) {
                             Log.d(TAG, "start tracking");
-                            Toast.makeText(Main2Activity.this, "start tracking", Toast.LENGTH_SHORT).show();
+                            //Toast.makeText(Main2Activity.this, "start tracking", Toast.LENGTH_SHORT).show();
 
                             startTracking(loc);
                         } else {
@@ -439,7 +458,7 @@ public class Main2Activity extends AppCompatActivity
                         if (checkContinue(count2)){
 
                             Log.d(TAG, "stop tracking");
-                            Toast.makeText(Main2Activity.this, "stop tracking", Toast.LENGTH_SHORT).show();
+                            //Toast.makeText(Main2Activity.this, "stop tracking", Toast.LENGTH_SHORT).show();
 
                             stopTracking(loc);
                         } else {
@@ -563,8 +582,8 @@ public class Main2Activity extends AppCompatActivity
         /* Set the alarm to start at 10:30 PM */
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(System.currentTimeMillis());
-        calendar.set(Calendar.HOUR_OF_DAY, 23);
-        calendar.set(Calendar.MINUTE, 8);
+        calendar.set(Calendar.HOUR_OF_DAY, 22);
+        calendar.set(Calendar.MINUTE, 30);
 
         manager.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), interval, pendingIntent);
     }
@@ -579,8 +598,8 @@ public class Main2Activity extends AppCompatActivity
         /* Set the alarm to start at 10:32 PM */
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(System.currentTimeMillis());
-        calendar.set(Calendar.HOUR_OF_DAY, 23);
-        calendar.set(Calendar.MINUTE, 14);
+        calendar.set(Calendar.HOUR_OF_DAY, 22);
+        calendar.set(Calendar.MINUTE, 32);
 
         manager.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), interval,pendingIntent);
     }

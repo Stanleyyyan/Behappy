@@ -3,13 +3,17 @@ package com.stanley.myapplication.contactlist;
 import android.app.Activity;
 import android.content.AsyncQueryHandler;
 import android.content.ContentResolver;
+import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.ContactsContract;
+import android.view.View;
+import android.widget.Button;
 import android.widget.ListView;
 
+import com.stanley.myapplication.Main2Activity;
 import com.stanley.myapplication.MySQLiteHelper;
 import com.stanley.myapplication.R;
 
@@ -25,6 +29,9 @@ public class ContactActivity extends Activity{
     private ListView ContactListView;
     private List<ContactList> list;
     private AsyncQueryHandler asyncQueryHandler; // 异步查询数据库类对象
+    private int userId;
+
+    private Button btn_save;
 
     private HashMap<String, ContactList> contactIdMap = null;
 
@@ -36,6 +43,16 @@ public class ContactActivity extends Activity{
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.contact_manage);
+
+        Bundle extras = getIntent().getExtras();
+        if (extras == null) {
+            userId = 1;
+
+        } else {
+            userId = extras.getInt("userId");
+        }
+
+
         myHelper = new MySQLiteHelper(this, "my.db", null, 1);
         dbw = myHelper.getWritableDatabase();
         dbr = myHelper.getReadableDatabase();
@@ -45,6 +62,18 @@ public class ContactActivity extends Activity{
         asyncQueryHandler = new MyAsyncQueryHandler(getContentResolver());
         init();
 
+        btn_save = (Button) findViewById(R.id.btn_save_contact);
+        btn_save.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                finish();
+                Intent intent = new Intent(ContactActivity.this, Main2Activity.class);
+                intent.putExtra("hint", false);
+                intent.putExtra("userId", userId);
+                startActivity(intent);
+
+            }
+        });
     }
 
     //---------------初始化数据库查询参数--------------//

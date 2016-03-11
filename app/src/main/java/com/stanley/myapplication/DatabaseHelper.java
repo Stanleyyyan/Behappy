@@ -8,6 +8,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.Date;
 import java.util.List;
 import java.util.Properties;
 
@@ -168,6 +169,7 @@ public class DatabaseHelper {
                 tem.executeUpdate();
 
                 tem.close();
+
                 conn.close();
 
             }
